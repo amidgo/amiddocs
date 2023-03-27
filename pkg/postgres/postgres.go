@@ -7,6 +7,8 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/jmoiron/sqlx"
 )
 
 const (
@@ -20,6 +22,7 @@ type Postgres struct {
 	connAttemps int
 	connTimeout time.Duration
 	Builder     squirrel.StatementBuilderType
+	DB          *sqlx.DB
 	Pool        *pgxpool.Pool
 }
 
@@ -56,6 +59,8 @@ func New(url string, options ...Option) (*Postgres, error) {
 	if err != nil {
 		return nil, fmt.Errorf("connection failed %w", err)
 	}
+	pgxDb := stdlib.OpenDB(*poolConfig.ConnConfig)
+	pg.DB = sqlx.NewDb(pgxDb, "pgx")
 
 	return pg, nil
 

@@ -45,6 +45,19 @@ func (a *registerUserAmid) insertUser(c *fiber.Ctx, user *usermodel.CreateUserDT
 	return usr
 }
 
+// RegisterUser godoc
+//
+//	@Summary		RegisterUser
+//	@Description	register user, require createUserModel, email should be unique
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			user	body		usermodel.CreateUserDTO	true	"create user dto"
+//	@Success		201		{object}	usermodel.UserDTO
+//	@Failure		400		{object}	amiderrors.ErrorResponse
+//	@Failure		500		{object}	amiderrors.ErrorResponse
+//	@Security		Bearer
+//	@Router			/users/register [post]
 func (h *UserHandler) RegisterUser(c *fiber.Ctx) error {
 	a := registerUserAmid{h: h}
 	a.checkAccess(c)

@@ -1,0 +1,202 @@
+definitions:
+  amiderrors.ErrorResponse:
+    properties:
+      code:
+        type: string
+      error:
+        type: string
+      http_code:
+        type: integer
+      raw: {}
+    type: object
+  tokenmodel.TokenResponse:
+    properties:
+      accessToken:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/userfields.UserRole'
+        type: array
+    type: object
+  userfields.UserRole:
+    enum:
+    - STUDENT
+    - ADMIN
+    - SECRETARY
+    type: string
+    x-enum-varnames:
+    - STUDENT
+    - ADMIN
+    - SECRETARY
+  usermodel.CreateUserDTO:
+    properties:
+      email:
+        type: string
+      fatherName:
+        type: string
+      name:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/userfields.UserRole'
+        type: array
+      surname:
+        type: string
+    type: object
+  usermodel.LoginForm:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  usermodel.UserDTO:
+    properties:
+      email:
+        type: string
+      fatherName:
+        type: string
+      id:
+        type: integer
+      login:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/userfields.UserRole'
+        type: array
+      surname:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is a sample swagger for Fiber
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Fiber Example API
+  version: "1.0"
+paths:
+  /users/all:
+    get:
+      consumes:
+      - application/json
+      description: get all users from database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/usermodel.UserDTO'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      summary: Get All Users
+      tags:
+      - users
+  /users/get-by-id:
+    get:
+      consumes:
+      - application/json
+      description: return user by id from path
+      parameters:
+      - description: get user by id
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/usermodel.UserDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      summary: Return User
+      tags:
+      - users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: login by login and password
+      parameters:
+      - description: login form
+        in: body
+        name: loginForm
+        required: true
+        schema:
+          $ref: '#/definitions/usermodel.LoginForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tokenmodel.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      summary: Login
+      tags:
+      - users
+  /users/register:
+    post:
+      consumes:
+      - application/json
+      description: register user, require createUserModel, email should be unique
+      parameters:
+      - description: create user dto
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/usermodel.CreateUserDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/usermodel.UserDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: RegisterUser
+      tags:
+      - users
+securityDefinitions:
+  Bearer:
+    description: Bearer Token Auth
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

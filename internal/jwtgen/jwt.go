@@ -3,8 +3,10 @@ package jwtgen
 import (
 	"crypto/rsa"
 	"log"
+	"net/http"
 	"os"
 
+	"github.com/amidgo/amiddocs/pkg/amiderrors"
 	"github.com/gofiber/fiber/v2"
 	jwtware "github.com/gofiber/jwt/v3"
 	"github.com/golang-jwt/jwt/v4"
@@ -16,8 +18,7 @@ var (
 )
 
 const (
-	TESTRSAPATH = "./config/private.pem"
-	PRODRSAPATH = "./config/private.pem"
+	PEMPATH = "./config/private.pem"
 )
 
 const (
@@ -25,7 +26,7 @@ const (
 )
 
 func loadKey() *rsa.PrivateKey {
-	b, err := os.ReadFile(TESTRSAPATH)
+	b, err := os.ReadFile(PEMPATH)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,6 +42,9 @@ func RsJwtWare() func(*fiber.Ctx) error {
 		jwtware.Config{
 			SigningMethod: "RS256",
 			SigningKey:    rsaPrivateKey.Public(),
+			ErrorHandler: func(c *fiber.Ctx, err error) error {
+				return amiderrors.NewErrorResponse(err.Error(), http.StatusBadRequest, "token_error").SendWithFiber(c)
+			},
 		},
 	)
 }

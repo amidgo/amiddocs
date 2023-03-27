@@ -13,6 +13,8 @@ import (
 type userService interface {
 	CreateUser(context.Context, *usermodel.CreateUserDTO) (*usermodel.UserDTO, *amiderrors.ErrorResponse)
 	Login(ctx context.Context, loginform usermodel.LoginForm) (*tokenmodel.TokenResponse, *amiderrors.ErrorResponse)
+	GetAllUsers(ctx context.Context) ([]*usermodel.UserDTO, *amiderrors.ErrorResponse)
+	GetUserById(ctx context.Context, id uint64) (*usermodel.UserDTO, *amiderrors.ErrorResponse)
 }
 
 type tokenService interface {

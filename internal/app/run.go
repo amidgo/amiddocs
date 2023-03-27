@@ -10,6 +10,7 @@ import (
 	"github.com/amidgo/amiddocs/internal/domain/userservice"
 	"github.com/amidgo/amiddocs/internal/jwtgen"
 	"github.com/amidgo/amiddocs/internal/models/usermodel/userfields"
+	"github.com/amidgo/amiddocs/internal/swagger"
 	"github.com/amidgo/amiddocs/internal/transport/http/handlers/userhandlers"
 	"github.com/amidgo/amiddocs/internal/transport/http/routing/userrouting"
 	"github.com/amidgo/amiddocs/pkg/middleware"
@@ -33,6 +34,7 @@ func Run() {
 	}
 	jwtGen := new(jwtgen.RsJWT)
 	tokenFabric := jwttoken.NewTokenFabric(jwtGen)
+
 	ms, _ := tokenFabric.CreateUserAccessToken(1, []userfields.UserRole{userfields.ADMIN})
 	fmt.Println(ms)
 	userRepo := userstorage.New(pg)
@@ -40,6 +42,8 @@ func Run() {
 	userService := userservice.New(userRepo, tokenFabric)
 
 	userHandler := userhandlers.New(userService, tokenFabric)
+
+	swagger.SetUp(app)
 	userrouting.SetUp(app, userHandler)
 
 	err = app.Listen(os.Getenv(HOSTENV) + ":" + os.Getenv(PORTENV))

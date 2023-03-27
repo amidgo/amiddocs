@@ -10,8 +10,8 @@ import (
 )
 
 const _BASIC_USER_GET = `
-	SELECT users.id,users.login,users.name,users.surname,users."fatherName",users.email,users.password,array_agg(roles.role) as userroles 
-	FROM users INNER JOIN roles ON users.id = roles."userId" `
+	SELECT users.id,users.login,users.name,users.surname,users.father_name,users.email,users.password,array_agg(roles.role) as userroles 
+	FROM users INNER JOIN roles ON users.id = roles.user_id `
 
 func scanUser(q pgx.Row, user *usermodel.UserDTO) error {
 	return q.Scan(

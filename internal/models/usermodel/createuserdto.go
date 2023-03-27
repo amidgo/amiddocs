@@ -11,11 +11,11 @@ import (
 )
 
 type CreateUserDTO struct {
-	Name       userfields.Name       `json:"name"`
-	Surname    userfields.Surname    `json:"surname"`
-	FatherName userfields.FatherName `json:"fatherName"`
-	Email      userfields.Email      `json:"email"`
-	Roles      []userfields.UserRole `json:"roles"`
+	Name       userfields.Name       `json:"name" db:"name"`
+	Surname    userfields.Surname    `json:"surname" db:"surname"`
+	FatherName userfields.FatherName `json:"fatherName" db:"father_name"`
+	Email      userfields.Email      `json:"email" db:"email"`
+	Roles      []userfields.UserRole `json:"roles" db:"roles"`
 }
 
 func NewCreateUserDTO(

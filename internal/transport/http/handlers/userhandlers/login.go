@@ -41,6 +41,18 @@ func (a *loginAmid) login(ctx context.Context, loginForm usermodel.LoginForm) *t
 	return tokenR
 }
 
+// Login godoc
+//
+//	@Summary		Login
+//	@Description	login by login and password
+//	@Tags			users
+//	@Accept			json
+//	@Produce		json
+//	@Param			loginForm	body		usermodel.LoginForm	true	"login form"
+//	@Success		200			{object}	tokenmodel.TokenResponse
+//	@Failure		400			{object}	amiderrors.ErrorResponse
+//	@Failure		500			{object}	amiderrors.ErrorResponse
+//	@Router			/users/login [post]
 func (h *UserHandler) Login(c *fiber.Ctx) error {
 	amid := loginAmid{h: h, err: nil}
 	loginForm := amid.parseBody(c)

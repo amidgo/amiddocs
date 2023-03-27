@@ -7,14 +7,14 @@ import (
 )
 
 type UserDTO struct {
-	ID         uint64                `json:"id"`
-	Login      userfields.Login      `json:"login"`
-	Password   userfields.Password   `json:"password"`
-	Name       userfields.Name       `json:"name"`
-	Surname    userfields.Surname    `json:"surname"`
-	FatherName userfields.FatherName `json:"fatherName"`
-	Email      userfields.Email      `json:"email"`
-	Roles      []userfields.UserRole `json:"roles"`
+	ID         uint64                `json:"id" db:"id"`
+	Login      userfields.Login      `json:"login" db:"login"`
+	Password   userfields.Password   `json:"password" db:"password"`
+	Name       userfields.Name       `json:"name" db:"name"`
+	Surname    userfields.Surname    `json:"surname" db:"surname"`
+	FatherName userfields.FatherName `json:"fatherName" db:"father_name"`
+	Email      userfields.Email      `json:"email" db:"email"`
+	Roles      []userfields.UserRole `json:"roles" db:"roles"`
 }
 
 func (u *UserDTO) ValidatableVariables() []validate.Validatable {
