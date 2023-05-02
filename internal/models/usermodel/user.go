@@ -2,7 +2,6 @@ package usermodel
 
 import (
 	"github.com/amidgo/amiddocs/internal/models/usermodel/userfields"
-	"github.com/amidgo/amiddocs/pkg/amiderrors"
 	"github.com/amidgo/amiddocs/pkg/validate"
 )
 
@@ -14,7 +13,7 @@ type UserDTO struct {
 	Surname    userfields.Surname    `json:"surname" db:"surname"`
 	FatherName userfields.FatherName `json:"fatherName" db:"father_name"`
 	Email      userfields.Email      `json:"email" db:"email"`
-	Roles      []userfields.UserRole `json:"roles" db:"roles"`
+	Roles      []userfields.Role     `json:"roles" db:"roles"`
 }
 
 func (u *UserDTO) ValidatableVariables() []validate.Validatable {
@@ -25,10 +24,6 @@ func (u *UserDTO) ValidatableVariables() []validate.Validatable {
 	return list
 }
 
-func (u *UserDTO) Validate() *amiderrors.ErrorResponse {
-	return validate.ValidateStructVariables(u.ValidatableVariables()...)
-}
-
-func NewUserDTO(id uint64, login userfields.Login, password userfields.Password, name userfields.Name, surname userfields.Surname, fatherName userfields.FatherName, email userfields.Email, role []userfields.UserRole) *UserDTO {
+func NewUserDTO(id uint64, login userfields.Login, password userfields.Password, name userfields.Name, surname userfields.Surname, fatherName userfields.FatherName, email userfields.Email, role []userfields.Role) *UserDTO {
 	return &UserDTO{id, login, password, name, surname, fatherName, email, role}
 }

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	_defaultPoolSize    = 1
+	_defaultPoolSize    = 10
 	_defaultConnAttemps = 10
 	_defatulTimeOut     = time.Second
 )
@@ -61,7 +61,6 @@ func New(url string, options ...Option) (*Postgres, error) {
 	}
 	pgxDb := stdlib.OpenDB(*poolConfig.ConnConfig)
 	pg.DB = sqlx.NewDb(pgxDb, "pgx")
-
 	return pg, nil
 
 }

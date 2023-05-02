@@ -5,9 +5,111 @@ definitions:
         type: string
       error:
         type: string
-      http_code:
+    type: object
+  depmodel.DepartmentDTO:
+    properties:
+      id:
         type: integer
-      raw: {}
+      name:
+        type: string
+      shortName:
+        type: string
+    type: object
+  doctempmodel.DocumentTemplateDTO:
+    properties:
+      departmentId:
+        type: integer
+      documentPath:
+        type: string
+      documentType:
+        $ref: '#/definitions/reqfields.DocumentType'
+    type: object
+  groupfields.EducationForm:
+    enum:
+    - FULL_TIME
+    - EXTRAMURAL
+    type: string
+    x-enum-varnames:
+    - FULL_TIME
+    - EXTRAMURAL
+  groupmodel.GroupDTO:
+    properties:
+      departmentId:
+        type: integer
+      educationFinishDate:
+        type: string
+      educationForm:
+        $ref: '#/definitions/groupfields.EducationForm'
+      educationStartDate:
+        type: string
+      educationYear:
+        type: integer
+      id:
+        type: integer
+      isBudget:
+        type: boolean
+      name:
+        type: string
+    type: object
+  reqfields.DocumentType:
+    enum:
+    - STUDY_DOCUMENT
+    type: string
+    x-enum-varnames:
+    - STUDY_DOCUMENT
+  reqfields.Status:
+    enum:
+    - SEND
+    - IN_PROGRESS
+    - DONE
+    type: string
+    x-enum-varnames:
+    - SEND
+    - IN_PROGRESS
+    - DONE
+  reqmodel.CreateRequestDTO:
+    properties:
+      count:
+        type: integer
+      departmentId:
+        type: integer
+      documentType:
+        $ref: '#/definitions/reqfields.DocumentType'
+      status:
+        $ref: '#/definitions/reqfields.Status'
+    type: object
+  stdocmodel.StudentDocumentDTO:
+    properties:
+      docNumber:
+        type: string
+      id:
+        type: integer
+      orderDate:
+        type: string
+      orderNumber:
+        type: string
+      studyStartDate:
+        type: string
+    type: object
+  studentmodel.CreateStudentDTO:
+    properties:
+      document:
+        $ref: '#/definitions/stdocmodel.StudentDocumentDTO'
+      groupName:
+        type: string
+      user:
+        $ref: '#/definitions/usermodel.CreateUserDTO'
+    type: object
+  studentmodel.StudentDTO:
+    properties:
+      document:
+        $ref: '#/definitions/stdocmodel.StudentDocumentDTO'
+      group:
+        $ref: '#/definitions/groupmodel.GroupDTO'
+      id:
+        type: integer
+      user:
+        $ref: '#/definitions/usermodel.UserDTO'
     type: object
   tokenmodel.TokenResponse:
     properties:
@@ -15,10 +117,10 @@ definitions:
         type: string
       roles:
         items:
-          $ref: '#/definitions/userfields.UserRole'
+          $ref: '#/definitions/userfields.Role'
         type: array
     type: object
-  userfields.UserRole:
+  userfields.Role:
     enum:
     - STUDENT
     - ADMIN
@@ -38,7 +140,7 @@ definitions:
         type: string
       roles:
         items:
-          $ref: '#/definitions/userfields.UserRole'
+          $ref: '#/definitions/userfields.Role'
         type: array
       surname:
         type: string
@@ -66,21 +168,350 @@ definitions:
         type: string
       roles:
         items:
-          $ref: '#/definitions/userfields.UserRole'
+          $ref: '#/definitions/userfields.Role'
         type: array
       surname:
         type: string
     type: object
 info:
   contact: {}
-  description: This is a sample swagger for Fiber
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Fiber Example API
+  title: AMIDDOCS OFFICIAL SWAGGER
   version: "1.0"
 paths:
+  /departments/create:
+    post:
+      consumes:
+      - application/json
+      description: enabled auto check unique name and shortName values
+      parameters:
+      - description: department dto
+        in: body
+        name: department
+        required: true
+        schema:
+          $ref: '#/definitions/depmodel.DepartmentDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/depmodel.DepartmentDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create department
+      tags:
+      - departments
+  /departments/get-all:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/depmodel.DepartmentDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      summary: Get All Departmnets
+      tags:
+      - departments
+  /departments/get-by-id:
+    get:
+      consumes:
+      - application/json
+      description: return department dto by id in param
+      parameters:
+      - description: department id
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/depmodel.DepartmentDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      summary: Get Department By own ID
+      tags:
+      - departments
+  /document-templates/upload:
+    post:
+      consumes:
+      - application/octet-stream
+      description: load or update template in files
+      parameters:
+      - description: department id
+        in: query
+        name: depId
+        required: true
+        type: integer
+      - description: document type
+        enum:
+        - STUDY_DOCUMENT
+        in: query
+        name: type
+        required: true
+        type: string
+      - description: document binary (.docx file)
+        in: formData
+        name: document
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/doctempmodel.DocumentTemplateDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: load document template
+      tags:
+      - document-templates
+  /groups/create:
+    post:
+      consumes:
+      - application/json
+      description: create group
+      parameters:
+      - description: group dto
+        in: body
+        name: groups
+        required: true
+        schema:
+          $ref: '#/definitions/groupmodel.GroupDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/groupmodel.GroupDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: CreateGroup
+      tags:
+      - groups
+  /groups/get-by-id:
+    get:
+      consumes:
+      - application/json
+      description: Get GroupDTO by Id
+      parameters:
+      - description: group id
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/groupmodel.GroupDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      summary: Get Group By Id
+      tags:
+      - groups
+  /requests/send:
+    post:
+      consumes:
+      - application/json
+      description: '"Send request to generate document"'
+      parameters:
+      - description: request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/reqmodel.CreateRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/studentmodel.StudentDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Send request
+      tags:
+      - requests
+  /students/create:
+    post:
+      consumes:
+      - application/json
+      description: create student
+      parameters:
+      - description: create student dto
+        in: body
+        name: student
+        required: true
+        schema:
+          $ref: '#/definitions/studentmodel.CreateStudentDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/studentmodel.StudentDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      security:
+      - Bearer: []
+      summary: Create Student
+      tags:
+      - students
+  /students/get-by-id:
+    get:
+      consumes:
+      - application/json
+      description: get student by id from query param
+      parameters:
+      - description: student id
+        in: query
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/studentmodel.StudentDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      summary: GetStudentByID
+      tags:
+      - students
   /users/all:
     get:
       consumes:
@@ -122,6 +553,10 @@ paths:
             $ref: '#/definitions/usermodel.UserDTO'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/amiderrors.ErrorResponse'
         "500":

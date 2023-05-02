@@ -21,6 +21,517 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/departments/create": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "enabled auto check unique name and shortName values",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "departments"
+                ],
+                "summary": "Create department",
+                "parameters": [
+                    {
+                        "description": "department dto",
+                        "name": "department",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/depmodel.DepartmentDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/depmodel.DepartmentDTO"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/departments/get-all": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "departments"
+                ],
+                "summary": "Get All Departmnets",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/depmodel.DepartmentDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/departments/get-by-id": {
+            "get": {
+                "description": "return department dto by id in param",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "departments"
+                ],
+                "summary": "Get Department By own ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "department id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/depmodel.DepartmentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/document-templates/upload": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "load or update template in files",
+                "consumes": [
+                    "application/octet-stream"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "document-templates"
+                ],
+                "summary": "load document template",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "department id",
+                        "name": "depId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "STUDY_DOCUMENT"
+                        ],
+                        "type": "string",
+                        "description": "document type",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "document binary (.docx file)",
+                        "name": "document",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/doctempmodel.DocumentTemplateDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/create": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "create group",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "summary": "CreateGroup",
+                "parameters": [
+                    {
+                        "description": "group dto",
+                        "name": "groups",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/groupmodel.GroupDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/groupmodel.GroupDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/groups/get-by-id": {
+            "get": {
+                "description": "Get GroupDTO by Id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "groups"
+                ],
+                "summary": "Get Group By Id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "group id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/groupmodel.GroupDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/requests/send": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "\"Send request to generate document\"",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "requests"
+                ],
+                "summary": "Send request",
+                "parameters": [
+                    {
+                        "description": "request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/reqmodel.CreateRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/studentmodel.StudentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/students/create": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "create student",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "Create Student",
+                "parameters": [
+                    {
+                        "description": "create student dto",
+                        "name": "student",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/studentmodel.CreateStudentDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studentmodel.StudentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/students/get-by-id": {
+            "get": {
+                "description": "get student by id from query param",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "GetStudentByID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "student id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studentmodel.StudentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/all": {
             "get": {
                 "description": "get all users from database",
@@ -84,6 +595,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/amiderrors.ErrorResponse"
                         }
@@ -204,11 +721,165 @@ const docTemplate = `{
                 },
                 "error": {
                     "type": "string"
-                },
-                "http_code": {
+                }
+            }
+        },
+        "depmodel.DepartmentDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "integer"
                 },
-                "raw": {}
+                "name": {
+                    "type": "string"
+                },
+                "shortName": {
+                    "type": "string"
+                }
+            }
+        },
+        "doctempmodel.DocumentTemplateDTO": {
+            "type": "object",
+            "properties": {
+                "departmentId": {
+                    "type": "integer"
+                },
+                "documentPath": {
+                    "type": "string"
+                },
+                "documentType": {
+                    "$ref": "#/definitions/reqfields.DocumentType"
+                }
+            }
+        },
+        "groupfields.EducationForm": {
+            "type": "string",
+            "enum": [
+                "FULL_TIME",
+                "EXTRAMURAL"
+            ],
+            "x-enum-varnames": [
+                "FULL_TIME",
+                "EXTRAMURAL"
+            ]
+        },
+        "groupmodel.GroupDTO": {
+            "type": "object",
+            "properties": {
+                "departmentId": {
+                    "type": "integer"
+                },
+                "educationFinishDate": {
+                    "type": "string"
+                },
+                "educationForm": {
+                    "$ref": "#/definitions/groupfields.EducationForm"
+                },
+                "educationStartDate": {
+                    "type": "string"
+                },
+                "educationYear": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "isBudget": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "reqfields.DocumentType": {
+            "type": "string",
+            "enum": [
+                "STUDY_DOCUMENT"
+            ],
+            "x-enum-varnames": [
+                "STUDY_DOCUMENT"
+            ]
+        },
+        "reqfields.Status": {
+            "type": "string",
+            "enum": [
+                "SEND",
+                "IN_PROGRESS",
+                "DONE"
+            ],
+            "x-enum-varnames": [
+                "SEND",
+                "IN_PROGRESS",
+                "DONE"
+            ]
+        },
+        "reqmodel.CreateRequestDTO": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "departmentId": {
+                    "type": "integer"
+                },
+                "documentType": {
+                    "$ref": "#/definitions/reqfields.DocumentType"
+                },
+                "status": {
+                    "$ref": "#/definitions/reqfields.Status"
+                }
+            }
+        },
+        "stdocmodel.StudentDocumentDTO": {
+            "type": "object",
+            "properties": {
+                "docNumber": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "orderDate": {
+                    "type": "string"
+                },
+                "orderNumber": {
+                    "type": "string"
+                },
+                "studyStartDate": {
+                    "type": "string"
+                }
+            }
+        },
+        "studentmodel.CreateStudentDTO": {
+            "type": "object",
+            "properties": {
+                "document": {
+                    "$ref": "#/definitions/stdocmodel.StudentDocumentDTO"
+                },
+                "groupName": {
+                    "type": "string"
+                },
+                "user": {
+                    "$ref": "#/definitions/usermodel.CreateUserDTO"
+                }
+            }
+        },
+        "studentmodel.StudentDTO": {
+            "type": "object",
+            "properties": {
+                "document": {
+                    "$ref": "#/definitions/stdocmodel.StudentDocumentDTO"
+                },
+                "group": {
+                    "$ref": "#/definitions/groupmodel.GroupDTO"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "user": {
+                    "$ref": "#/definitions/usermodel.UserDTO"
+                }
             }
         },
         "tokenmodel.TokenResponse": {
@@ -220,12 +891,12 @@ const docTemplate = `{
                 "roles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/userfields.UserRole"
+                        "$ref": "#/definitions/userfields.Role"
                     }
                 }
             }
         },
-        "userfields.UserRole": {
+        "userfields.Role": {
             "type": "string",
             "enum": [
                 "STUDENT",
@@ -253,7 +924,7 @@ const docTemplate = `{
                 "roles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/userfields.UserRole"
+                        "$ref": "#/definitions/userfields.Role"
                     }
                 },
                 "surname": {
@@ -296,7 +967,7 @@ const docTemplate = `{
                 "roles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/userfields.UserRole"
+                        "$ref": "#/definitions/userfields.Role"
                     }
                 },
                 "surname": {
@@ -321,8 +992,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Fiber Example API",
-	Description:      "This is a sample swagger for Fiber",
+	Title:            "AMIDDOCS OFFICIAL SWAGGER",
+	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

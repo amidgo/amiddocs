@@ -7,14 +7,17 @@ import (
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
 )
 
-func (u *UserStorage) UpdateName(ctx context.Context, userId uint64, name userfields.Name) *amiderrors.ErrorResponse {
+func (u *userStorage) UpdateName(ctx context.Context, userId uint64, name userfields.Name) error {
 	_, err := u.p.DB.NamedExecContext(ctx,
 		`UPDATE users SET name = :name WHERE id = :id `,
 		map[string]interface{}{"name": name, "id": userId})
-	return amiderrors.NewInternalErrorResponse(err)
+	if err != nil {
+		return userError(err, amiderrors.NewCause("update name query", "UpdateName", _PROVIDER))
+	}
+	return nil
 }
 
-func (u *UserStorage) UpdateSurname(ctx context.Context, userId uint64, surname userfields.Surname) *amiderrors.ErrorResponse {
+func (u *userStorage) UpdateSurname(ctx context.Context, userId uint64, surname userfields.Surname) error {
 	_, err := u.p.DB.NamedExecContext(ctx,
 		`UPDATE users SET surname = :surname WHERE id = :id `,
 		map[string]interface{}{
@@ -22,10 +25,13 @@ func (u *UserStorage) UpdateSurname(ctx context.Context, userId uint64, surname 
 			"id":      userId,
 		},
 	)
-	return amiderrors.NewInternalErrorResponse(err)
+	if err != nil {
+		return userError(err, amiderrors.NewCause("update surname query", "UpdateSurname", _PROVIDER))
+	}
+	return nil
 }
 
-func (u *UserStorage) UpdateFatherName(ctx context.Context, userId uint64, fatherName userfields.FatherName) *amiderrors.ErrorResponse {
+func (u *userStorage) UpdateFatherName(ctx context.Context, userId uint64, fatherName userfields.FatherName) error {
 	_, err := u.p.DB.NamedExecContext(ctx,
 		`UPDATE users SET father_name = :father_name WHERE id = :id `,
 		map[string]interface{}{
@@ -33,10 +39,13 @@ func (u *UserStorage) UpdateFatherName(ctx context.Context, userId uint64, fathe
 			"id":          userId,
 		},
 	)
-	return amiderrors.NewInternalErrorResponse(err)
+	if err != nil {
+		return userError(err, amiderrors.NewCause("update father name query", "UpdateFatherName", _PROVIDER))
+	}
+	return nil
 }
 
-func (u *UserStorage) UpdateLogin(ctx context.Context, userId uint64, login userfields.Login) *amiderrors.ErrorResponse {
+func (u *userStorage) UpdateLogin(ctx context.Context, userId uint64, login userfields.Login) error {
 	_, err := u.p.DB.NamedExecContext(ctx,
 		`UPDATE users SET login = :login WHERE id = :id `,
 		map[string]interface{}{
@@ -44,10 +53,13 @@ func (u *UserStorage) UpdateLogin(ctx context.Context, userId uint64, login user
 			"id":    userId,
 		},
 	)
-	return amiderrors.NewInternalErrorResponse(err)
+	if err != nil {
+		return userError(err, amiderrors.NewCause("update login query", "UpdateLogin", _PROVIDER))
+	}
+	return nil
 }
 
-func (u *UserStorage) UpdatePassword(ctx context.Context, userId uint64, hashPassword string) *amiderrors.ErrorResponse {
+func (u *userStorage) UpdatePassword(ctx context.Context, userId uint64, hashPassword string) error {
 	_, err := u.p.DB.NamedExecContext(ctx,
 		`UPDATE users SET password = :password WHERE id = :id `,
 		map[string]interface{}{
@@ -55,10 +67,13 @@ func (u *UserStorage) UpdatePassword(ctx context.Context, userId uint64, hashPas
 			"id":       userId,
 		},
 	)
-	return amiderrors.NewInternalErrorResponse(err)
+	if err != nil {
+		return userError(err, amiderrors.NewCause("update password query", "UpdatePassword", _PROVIDER))
+	}
+	return nil
 }
 
-func (u *UserStorage) UpdateEmail(ctx context.Context, userId uint64, email userfields.Email) *amiderrors.ErrorResponse {
+func (u *userStorage) UpdateEmail(ctx context.Context, userId uint64, email userfields.Email) error {
 	_, err := u.p.DB.NamedExecContext(ctx,
 		`UPDATE users SET email = :email WHERE id = :id `,
 		map[string]interface{}{
@@ -66,27 +81,41 @@ func (u *UserStorage) UpdateEmail(ctx context.Context, userId uint64, email user
 			"id":    userId,
 		},
 	)
-	return amiderrors.NewInternalErrorResponse(err)
+	if err != nil {
+		return userError(err, amiderrors.NewCause("update email query", "UpdateEmail", _PROVIDER))
+	}
+	return nil
 }
 
-func (u *UserStorage) RemoveRole(ctx context.Context, userId uint64, role userfields.UserRole) *amiderrors.ErrorResponse {
-	_, err := u.p.DB.NamedExecContext(ctx,
-		`DELETE FROM roles where user_id = :user_id AND role = :role`,
+func (u *userStorage) RemoveRole(ctx context.Context, userId uint64, role userfields.Role) error {
+	role_id := 0
+	err := u.p.Pool.QueryRow(ctx, `SELECT id FROM roles WHERE role = $1`, role).Scan(&role_id)
+	if err != nil {
+		userError(err, amiderrors.NewCause("scan role_id query", "RemoveRole", _PROVIDER))
+	}
+	_, err = u.p.DB.NamedExecContext(ctx,
+		`DELETE FROM roles where user_id = :user_id AND role_id = :role`,
 		map[string]interface{}{
 			"user_id": userId,
-			"role":    role,
+			"role_id": role_id,
 		},
 	)
-	return amiderrors.NewInternalErrorResponse(err)
+	if err != nil {
+		userError(err, amiderrors.NewCause("remove rol query", "RemoveRole", _PROVIDER))
+	}
+	return nil
 }
 
-func (u *UserStorage) AddRole(ctx context.Context, userId uint64, role userfields.UserRole) *amiderrors.ErrorResponse {
+func (u *userStorage) AddRole(ctx context.Context, userId uint64, role userfields.Role) error {
 	_, err := u.p.DB.NamedExecContext(ctx,
-		`INSERT INTO roles (user_id,role) VALUES :user_id, :role`,
+		`INSERT INTO user_roles (user_id,role_id) VALUES :user_id, (SELECT roles.role FROM roles WHERE roles.role = :role)`,
 		map[string]interface{}{
 			"user_id": userId,
-			"role":    role,
+			"role_id": role,
 		},
 	)
-	return amiderrors.NewInternalErrorResponse(err)
+	if err != nil {
+		return userError(err, amiderrors.NewCause("add role query", "AddRole", _PROVIDER))
+	}
+	return nil
 }

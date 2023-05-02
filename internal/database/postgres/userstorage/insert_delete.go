@@ -6,69 +6,85 @@ import (
 	"github.com/amidgo/amiddocs/internal/models/usermodel"
 	"github.com/amidgo/amiddocs/internal/models/usermodel/userfields"
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type insertUserAmid struct {
-	usrSt *UserStorage
-	err   error
+// create table if not exists users (
+//     id bigserial primary key,
+//     name varchar(40) not null,
+//     surname varchar(60) not null,
+//     father_name varchar(40) not null,
+//     login varchar(100) not null unique,
+//     email varchar(100),
+//     password varchar(200) not null
+// );
+
+func insertUserDTO(ctx context.Context, tx pgx.Tx, usr *usermodel.UserDTO, id *uint64) error {
+	err := tx.QueryRow(
+		ctx,
+		`INSERT INTO users 
+			(name,surname,father_name,login,email,password)
+		VALUES ($1,$2,$3,$4,$5,$6)
+		RETURNING id`,
+		usr.Name,
+		usr.Surname,
+		pgtype.Text{String: string(usr.FatherName), Valid: usr.FatherName != ""},
+		usr.Login,
+		pgtype.Text{String: string(usr.Email), Valid: usr.Email != ""},
+		usr.Password,
+	).Scan(id)
+	if err != nil {
+		return userError(err, amiderrors.NewCause("insert user dto", "InsertUser", _PROVIDER))
+	}
+	return nil
 }
 
-func (a *insertUserAmid) insertUserDTO(ctx context.Context, usr *usermodel.UserDTO, id *uint64) *sqlx.Rows {
-	if a.err != nil {
-		return nil
-	}
-	rows, err := a.usrSt.p.DB.
-		NamedQueryContext(ctx,
-			`INSERT INTO users (login,password,surname,name,father_name,email) 
-		VALUES (:login, :password, :surname, :name, :father_name, :email) RETURNING id`,
-			usr,
-		)
-	a.err = err
-	return rows
-}
-
-func (a *insertUserAmid) scan(ctx context.Context, rows *sqlx.Rows, id *uint64) {
-	if a.err != nil {
-		return
-	}
-	for rows.Next() {
-		err := rows.Scan(id)
-		if err != nil {
-			a.err = err
-		}
-	}
-}
-
-func (a *insertUserAmid) insertUserRoles(ctx context.Context, id uint64, roles []userfields.UserRole) {
-	if a.err != nil {
-		return
-	}
+func insertUserRoles(ctx context.Context, tx pgx.Tx, id uint64, roles []userfields.Role) error {
+	rows := make([][]interface{}, 0)
+	role_id := 0
 	for _, r := range roles {
-		_, err := a.usrSt.p.DB.NamedExecContext(ctx,
-			`INSERT INTO roles (user_id,role) VALUES (:id, :role)`,
-			map[string]interface{}{"id": id, "role": r})
+		err := tx.QueryRow(ctx, `SELECT id FROM roles WHERE role = $1`, r).Scan(&role_id)
 		if err != nil {
-			a.err = err
-			return
+			return userError(err, amiderrors.NewCause("scan role id query", "insertUserRoles", _PROVIDER))
 		}
+		rows = append(rows, []interface{}{id, role_id})
 	}
+	_, err := tx.CopyFrom(
+		ctx,
+		pgx.Identifier{"user_roles"},
+		[]string{"user_id", "role_id"},
+		pgx.CopyFromRows(rows),
+	)
+	if err != nil {
+		return userError(err, amiderrors.NewCause("insert user roles", "InsertUser", _PROVIDER))
+	}
+	return nil
 }
 
-func (u *UserStorage) InsertUser(ctx context.Context, usr *usermodel.UserDTO) (uint64, *amiderrors.ErrorResponse) {
-	var id uint64
-	amid := insertUserAmid{usrSt: u, err: nil}
-	rows := amid.insertUserDTO(ctx, usr, &id)
-	amid.scan(ctx, rows, &id)
-	amid.insertUserRoles(ctx, id, usr.Roles)
-	if amid.err != nil {
-		return 0, amiderrors.NewInternalErrorResponse(amid.err)
+func (u *userStorage) InsertUser(ctx context.Context, usr *usermodel.UserDTO) (*usermodel.UserDTO, error) {
+	tx, err := u.p.Pool.Begin(ctx)
+	if err != nil {
+		return nil, userError(err, amiderrors.NewCause("begin tx", "InsertUser", _PROVIDER))
 	}
-	return id, nil
+	defer tx.Rollback(ctx)
+	err = insertUserDTO(ctx, tx, usr, &usr.ID)
+	if err != nil {
+		return nil, err
+	}
+	err = insertUserRoles(ctx, tx, usr.ID, usr.Roles)
+	if err != nil {
+		return nil, err
+	}
+	err = tx.Commit(ctx)
+	if err != nil {
+		return nil, userError(err, amiderrors.NewCause("commit transaction", "InsertUser", _PROVIDER))
+	}
+	return usr, nil
 }
 
-func (u *UserStorage) DeleteUser(ctx context.Context, userId uint64) *amiderrors.ErrorResponse {
-	_, err := u.p.Pool.
-		Exec(ctx, "DELETE FROM users WHERE id = $1", userId)
-	return amiderrors.NewInternalErrorResponse(err)
+func (u *userStorage) DeleteUser(ctx context.Context, userId uint64) error {
+	_, err := u.p.DB.
+		ExecContext(ctx, "DELETE FROM users WHERE id = $1", userId)
+	return userError(err, amiderrors.NewCause("delete user query", "DeleteUser", _PROVIDER))
 }

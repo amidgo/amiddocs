@@ -1,7 +1,6 @@
 package userfields
 
 import (
-	"github.com/amidgo/amiddocs/pkg/amiderrors"
 	"github.com/amidgo/amiddocs/pkg/validate"
 )
 
@@ -13,6 +12,6 @@ const (
 	NAME_FIELD_NAME = "Имя"
 )
 
-func (n Name) Validate() *amiderrors.ErrorResponse {
+func (n Name) Validate() error {
 	return validate.StringValidate(string(n), NAME_FIELD_NAME, NAME_MIN_LENGTH, NAME_MAX_LENGTH)
 }

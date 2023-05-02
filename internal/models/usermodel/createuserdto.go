@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 
+	"github.com/amidgo/amiddocs/internal/errorutils/usererror"
 	"github.com/amidgo/amiddocs/internal/models/usermodel/userfields"
 
 	e "github.com/amidgo/amiddocs/pkg/amiderrors"
@@ -15,7 +16,7 @@ type CreateUserDTO struct {
 	Surname    userfields.Surname    `json:"surname" db:"surname"`
 	FatherName userfields.FatherName `json:"fatherName" db:"father_name"`
 	Email      userfields.Email      `json:"email" db:"email"`
-	Roles      []userfields.UserRole `json:"roles" db:"roles"`
+	Roles      []userfields.Role     `json:"roles" db:"roles"`
 }
 
 func NewCreateUserDTO(
@@ -23,25 +24,25 @@ func NewCreateUserDTO(
 	surname userfields.Surname,
 	fatherName userfields.FatherName,
 	email userfields.Email,
-	role []userfields.UserRole,
+	role []userfields.Role,
 ) *CreateUserDTO {
 	return &CreateUserDTO{name, surname, fatherName, email, role}
 }
 
-func (dto *CreateUserDTO) GenerateLoginAndPassword() (userfields.Login, userfields.Password, *e.ErrorResponse) {
+func (dto *CreateUserDTO) GenerateLoginAndPassword() (userfields.Login, userfields.Password, error) {
 	if len(dto.Name) == 0 || len(dto.Surname) == 0 {
 		return "", "", e.EmptyValues(userfields.NAME_FIELD_NAME)
 	}
 	randInt := rand.Intn(1000)
-	login := string(dto.Surname) + string(dto.Name[0]) + string(dto.FatherName[0]) + fmt.Sprint(randInt)
-	password, err := userfields.Password(login).Hash()
-	if err != nil {
-		return "", "", err
+	fsym := ""
+	if dto.FatherName != "" {
+		fsym = string([]rune(dto.FatherName)[0])
 	}
-	return userfields.Login(login), userfields.Password(password), nil
+	login := string(dto.Surname) + string([]rune(dto.Name)[0]) + fsym + fmt.Sprint(randInt)
+	return userfields.Login(login), userfields.Password(login), nil
 }
 
-func (dto *CreateUserDTO) ValidateVariables() []validate.Validatable {
+func (dto *CreateUserDTO) ValidatableVariables() []validate.Validatable {
 	list := []validate.Validatable{dto.Name, dto.Surname, dto.FatherName, dto.Email}
 	for _, r := range dto.Roles {
 		list = append(list, r)
@@ -49,6 +50,13 @@ func (dto *CreateUserDTO) ValidateVariables() []validate.Validatable {
 	return list
 }
 
-func (dto *CreateUserDTO) Validate() *e.ErrorResponse {
-	return validate.ValidateStructVariables(dto.ValidateVariables()...)
+func (dto *CreateUserDTO) Validate() error {
+	if len(dto.Roles) == 0 {
+		return usererror.EMPTY_ROLES
+	}
+	err := validate.ValidateFields(dto)
+	if err != nil {
+		return err
+	}
+	return nil
 }

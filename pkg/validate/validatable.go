@@ -1,18 +1,15 @@
 package validate
 
-import "github.com/amidgo/amiddocs/pkg/amiderrors"
-
 type Validatable interface {
-	Validate() *amiderrors.ErrorResponse
+	Validate() error
 }
 
 type ValidatableStruct interface {
-	Validatable
 	ValidatableVariables() []Validatable
 }
 
-func ValidateStructVariables(vars ...Validatable) *amiderrors.ErrorResponse {
-	for _, v := range vars {
+func ValidateFields(v ValidatableStruct) error {
+	for _, v := range v.ValidatableVariables() {
 		err := v.Validate()
 		if err != nil {
 			return err

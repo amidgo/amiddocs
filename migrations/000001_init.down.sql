@@ -1,16 +1,15 @@
-drop table if exists studentRequests;
+drop table if exists document_types cascade;
+drop table if exists document_templates cascade;
+drop table if exists request_status cascade;
+drop table if exists requests;
+drop table if exists students cascade;
+drop table if exists student_documents cascade;
+drop table if exists groups cascade;
+drop table if exists departments cascade;
+drop table if exists user_roles cascade;
+drop table if exists roles cascade;
+drop table if exists users cascade; 
 
-drop table if exists students;
-
-drop table if exists studentDocuments;
-
-drop table if exists groups;
-
-drop table if exists departments;
-
-drop table if exists roles;
-
-drop table if exists users;
 
 
 

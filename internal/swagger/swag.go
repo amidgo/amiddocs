@@ -6,9 +6,8 @@ import (
 	"github.com/gofiber/swagger"
 )
 
-//	@title						Fiber Example API
+//	@title						AMIDDOCS OFFICIAL SWAGGER
 //	@version					1.0
-//	@description				This is a sample swagger for Fiber
 //	@termsOfService				http://swagger.io/terms/
 //	@license.name				Apache 2.0
 //	@license.url				http://www.apache.org/licenses/LICENSE-2.0.html
