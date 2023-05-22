@@ -6,5 +6,6 @@ import (
 )
 
 func SetUp(app *fiber.App) {
-	app.Use(logger.New(logger.ConfigDefault))
+	config := logger.ConfigDefault
+	app.Use(logger.New(config))
 }

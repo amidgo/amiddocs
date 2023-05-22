@@ -20,6 +20,7 @@ import (
 //	@Failure		400	{object}	amiderrors.ErrorResponse
 //	@Failure		404	{object}	amiderrors.ErrorResponse
 //	@Failure		500	{object}	amiderrors.ErrorResponse
+//	@Security		Token
 //	@Router			/students/get-by-id [get]
 func (h *studentHandler) GetStudentById(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Query("id"), 10, 64)

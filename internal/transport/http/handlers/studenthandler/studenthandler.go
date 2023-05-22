@@ -3,9 +3,9 @@ package studenthandler
 import (
 	"context"
 
-	"github.com/amidgo/amiddocs/internal/jwttoken"
 	"github.com/amidgo/amiddocs/internal/models/studentmodel"
 	"github.com/amidgo/amiddocs/internal/models/usermodel/userfields"
+	"github.com/amidgo/amiddocs/internal/transport/http/handlers"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -15,6 +15,7 @@ const (
 	_ROUTE_PATH = "/students"
 	_CREATE     = "/create"
 	_GET_BY_ID  = "/get-by-id"
+	_GET_INFO   = "/info"
 )
 
 type studentService interface {
@@ -22,6 +23,7 @@ type studentService interface {
 }
 
 type studentProvider interface {
+	StudentByUserId(ctx context.Context, id uint64) (*studentmodel.StudentDTO, error)
 	StudentById(ctx context.Context, id uint64) (*studentmodel.StudentDTO, error)
 }
 
@@ -32,17 +34,19 @@ type roleValidator interface {
 type studentHandler struct {
 	studentP studentProvider
 	studentS studentService
+	jwt      handlers.JwtManager
 }
 
 func SetUp(
 	app *fiber.App,
-	jwt func(c *fiber.Ctx) error,
+	jwt handlers.JwtManager,
 	studentS studentService,
 	studentP studentProvider,
 ) {
-	handler := studentHandler{studentS: studentS, studentP: studentP}
+	handler := studentHandler{studentS: studentS, studentP: studentP, jwt: jwt}
 	route := app.Group(_ROUTE_PATH)
 
 	route.Get(_GET_BY_ID, handler.GetStudentById)
-	route.Post(_CREATE, jwt, jwttoken.AdminAccess, handler.CreateStudent)
+	route.Post(_CREATE, jwt.Ware(), jwt.AdminAccess, handler.CreateStudent)
+	route.Get(_GET_INFO, jwt.Ware(), jwt.StudentAccess, handler.StudentInfo)
 }

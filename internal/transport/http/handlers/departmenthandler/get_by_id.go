@@ -20,8 +20,9 @@ import (
 //	@Failure		400	{object}	amiderrors.ErrorResponse
 //	@Failure		404	{object}	amiderrors.ErrorResponse
 //	@Failure		500	{object}	amiderrors.ErrorResponse
+//	@Security		Token
 //	@Router			/departments/get-by-id [get]
-func (h *DepartmentHandler) GetDepartmentById(c *fiber.Ctx) error {
+func (h *departmentHandler) GetDepartmentById(c *fiber.Ctx) error {
 	id, e := strconv.ParseUint(c.Query("id", "0"), 10, 64)
 	if e != nil {
 		return amiderrors.NewInternalErrorResponse(e, amiderrors.NewCause("parse id", "GetDepartmentById", _PROVIDER)).SendWithFiber(c)

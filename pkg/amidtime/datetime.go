@@ -8,24 +8,23 @@ import (
 
 type DateTime time.Time
 
-func (t DateTime) Unix() int64 {
-	return t.Time().Unix()
-}
-
-func (t DateTime) Time() time.Time {
+func (t DateTime) T() time.Time {
 	return time.Time(t)
 }
 
+func (t DateTime) Date() Date {
+	return Date(t)
+}
+
 func (t DateTime) String() string {
-	return t.Time().Format(time.DateTime)
+	return t.T().Format(time.DateTime)
 }
 
 func (t *DateTime) Scan(src any) error {
-	if src == nil {
+	switch src := src.(type) {
+	case nil:
 		*t = DateTime{}
 		return nil
-	}
-	switch src := src.(type) {
 	case int64:
 		tm := time.Unix(src, 0)
 		*t = DateTime(tm)
@@ -48,5 +47,17 @@ func (t *DateTime) UnmarshalJSON(b []byte) error {
 }
 
 func (t DateTime) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprint(t.Unix())), nil
+	return []byte(fmt.Sprint(t.T().Unix())), nil
+}
+
+func (t DateTime) Uint() uint64 {
+	return uint64(t.T().Unix())
+}
+
+func (t DateTime) Int() int64 {
+	return t.T().Unix()
+}
+
+func Now() DateTime {
+	return DateTime(time.Now())
 }

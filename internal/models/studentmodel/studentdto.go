@@ -1,6 +1,7 @@
 package studentmodel
 
 import (
+	"github.com/amidgo/amiddocs/internal/models/depmodel"
 	"github.com/amidgo/amiddocs/internal/models/groupmodel"
 	"github.com/amidgo/amiddocs/internal/models/stdocmodel"
 	"github.com/amidgo/amiddocs/internal/models/usermodel"
@@ -8,10 +9,11 @@ import (
 )
 
 type StudentDTO struct {
-	ID       uint64                         `json:"id" db:"id"`
-	User     *usermodel.UserDTO             `json:"user"`
-	Document *stdocmodel.StudentDocumentDTO `json:"document"`
-	Group    *groupmodel.GroupDTO           `json:"group"`
+	ID         uint64                         `json:"id" db:"id"`
+	User       *usermodel.UserDTO             `json:"user"`
+	Document   *stdocmodel.StudentDocumentDTO `json:"document"`
+	Group      *groupmodel.GroupDTO           `json:"group"`
+	Department *depmodel.DepartmentDTO        `json:"department"`
 }
 
 func (s *StudentDTO) ValidatableVariables() []validate.Validatable {
@@ -27,11 +29,13 @@ func NewStudentDTO(
 	user *usermodel.UserDTO,
 	document *stdocmodel.StudentDocumentDTO,
 	group *groupmodel.GroupDTO,
+	department *depmodel.DepartmentDTO,
 ) *StudentDTO {
 	return &StudentDTO{
-		ID:       id,
-		User:     user,
-		Document: document,
-		Group:    group,
+		ID:         id,
+		User:       user,
+		Document:   document,
+		Group:      group,
+		Department: department,
 	}
 }

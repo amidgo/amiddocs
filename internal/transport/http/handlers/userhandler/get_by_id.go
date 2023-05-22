@@ -22,8 +22,9 @@ const _ID_Q = "id"
 //	@Failure		400	{object}	amiderrors.ErrorResponse
 //	@Failure		404	{object}	amiderrors.ErrorResponse
 //	@Failure		500	{object}	amiderrors.ErrorResponse
+//	@Security		Token
 //	@Router			/users/get-by-id [get]
-func (h *UserHandler) GetUserById(c *fiber.Ctx) error {
+func (h *userHandler) GetUserById(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Query(_ID_Q, "word"), 10, 64)
 	if err != nil {
 		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse id", "GetUserById", _PROVIDER))

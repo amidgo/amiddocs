@@ -15,8 +15,9 @@ import (
 //	@Produce		json
 //	@Success		200	{array}		usermodel.UserDTO
 //	@Failure		500	{object}	amiderrors.ErrorResponse
+//	@Security		Token
 //	@Router			/users/all [get]
-func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
+func (h *userHandler) GetAllUsers(c *fiber.Ctx) error {
 	userList, err := h.userP.AllUsers(c.UserContext())
 	if err != nil {
 		return err

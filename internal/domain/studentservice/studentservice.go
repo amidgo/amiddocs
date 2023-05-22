@@ -3,6 +3,7 @@ package studentservice
 import (
 	"context"
 
+	"github.com/amidgo/amiddocs/internal/models/depmodel"
 	"github.com/amidgo/amiddocs/internal/models/groupmodel"
 	"github.com/amidgo/amiddocs/internal/models/groupmodel/groupfields"
 	"github.com/amidgo/amiddocs/internal/models/stdocmodel"
@@ -12,20 +13,23 @@ import (
 	"github.com/amidgo/amiddocs/internal/models/usermodel/userfields"
 )
 
-type groupRep interface {
+type groupProvider interface {
 	GroupByName(ctx context.Context, name groupfields.Name) (*groupmodel.GroupDTO, error)
 }
-type studentDocRep interface {
+type studentDocProvider interface {
 	DocumentByOrderNumber(ctx context.Context, orderNumber stdocfields.OrderNumber) (*stdocmodel.StudentDocumentDTO, error)
 	DocumentByDocNumber(ctx context.Context, docNumber stdocfields.DocNumber) (*stdocmodel.StudentDocumentDTO, error)
 }
-type userRep interface {
+type userProvider interface {
 	UserByEmail(ctx context.Context, email userfields.Email) (*usermodel.UserDTO, error)
 }
-type studentRep interface {
+type studentProvider interface {
 	StudentById(ctx context.Context, id uint64) (*studentmodel.StudentDTO, error)
 	AllStudents(ctx context.Context) ([]*studentmodel.StudentDTO, error)
 	InsertStudent(ctx context.Context, student *studentmodel.StudentDTO) (*studentmodel.StudentDTO, error)
+}
+type depProvider interface {
+	StudyDepartment(ctx context.Context, studyDepId uint64) (*depmodel.DepartmentDTO, error)
 }
 
 type encrypter interface {
@@ -34,13 +38,28 @@ type encrypter interface {
 }
 
 type studentService struct {
-	groupRep      groupRep
-	studentDocRep studentDocRep
-	userRep       userRep
-	studentRep    studentRep
-	encrypter     encrypter
+	groupProv      groupProvider
+	studentDocProv studentDocProvider
+	userProv       userProvider
+	studentRep     studentProvider
+	depProv        depProvider
+	encrypter      encrypter
 }
 
-func New(groupRep groupRep, studentDocRep studentDocRep, userRep userRep, studentRep studentRep, enctypter encrypter) *studentService {
-	return &studentService{groupRep: groupRep, studentDocRep: studentDocRep, userRep: userRep, studentRep: studentRep, encrypter: enctypter}
+func New(
+	groupRep groupProvider,
+	studentDocRep studentDocProvider,
+	userRep userProvider,
+	studentRep studentProvider,
+	depRep depProvider,
+	enctypter encrypter,
+) *studentService {
+	return &studentService{
+		groupProv:      groupRep,
+		studentDocProv: studentDocRep,
+		userProv:       userRep,
+		studentRep:     studentRep,
+		depProv:        depRep,
+		encrypter:      enctypter,
+	}
 }

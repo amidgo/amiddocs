@@ -2,10 +2,11 @@ package doctempservice
 
 import (
 	"context"
+	"io"
 
 	"github.com/amidgo/amiddocs/internal/models/depmodel"
 	"github.com/amidgo/amiddocs/internal/models/doctempmodel"
-	"github.com/amidgo/amiddocs/internal/models/reqmodel/reqfields"
+	"github.com/amidgo/amiddocs/internal/models/doctypemodel/doctypefields"
 )
 
 const _PROVIDER = "internal/domain/doctempservice"
@@ -15,15 +16,15 @@ type departmentProvider interface {
 }
 
 type docTypeProvider interface {
-	DocTypeExists(ctx context.Context, docType reqfields.DocumentType) error
+	DocTypeExists(ctx context.Context, docType doctypefields.DocumentType) error
 }
 
 type docTempProvider interface {
-	DocTemp(ctx context.Context, depId uint64, docType reqfields.DocumentType) (*doctempmodel.DocumentTemplateDTO, error)
+	DocumentTemplate(ctx context.Context, wr io.Writer, depId uint64, docType doctypefields.DocumentType) error
 }
 
 type docTempService interface {
-	InsertDocTemp(ctx context.Context, template *doctempmodel.DocumentTemplateDTO) (*doctempmodel.DocumentTemplateDTO, error)
+	InsertDocTemp(ctx context.Context, template *doctempmodel.DocumentTemplateDTO) error
 	UpdateDocTemp(ctx context.Context, template *doctempmodel.DocumentTemplateDTO) error
 }
 

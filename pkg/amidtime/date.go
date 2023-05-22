@@ -13,20 +13,25 @@ var (
 
 type Date time.Time
 
-func (t Date) Time() time.Time {
+func (t Date) T() time.Time {
 	return time.Time(t)
 }
 
 func (t Date) String() string {
-	return t.Time().Format(time.DateOnly)
+	return t.T().Format(time.DateOnly)
+}
+
+// returns string in dd.mm.yyyy format
+func (t Date) Human() string {
+	time := t.T()
+	return fmt.Sprintf("%02d.%02d.%d", time.Day(), time.Month(), time.Year())
 }
 
 func (t *Date) Scan(src any) error {
-	if src == nil {
+	switch src := src.(type) {
+	case nil:
 		*t = Date{}
 		return nil
-	}
-	switch src := src.(type) {
 	case string:
 		tm, err := time.Parse(time.DateOnly, src)
 		if err != nil {
@@ -57,5 +62,5 @@ func (t *Date) UnmarshalJSON(b []byte) error {
 }
 
 func (t Date) MarshalJSON() ([]byte, error) {
-	return []byte(`"` + time.Time(t).Format(time.DateOnly) + `"`), nil
+	return []byte(`"` + t.T().Format(time.DateOnly) + `"`), nil
 }

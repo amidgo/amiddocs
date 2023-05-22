@@ -2,6 +2,7 @@ package userstorage
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/amidgo/amiddocs/internal/models/usermodel"
 	"github.com/amidgo/amiddocs/internal/models/usermodel/userfields"
@@ -10,23 +11,34 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// create table if not exists users (
-//     id bigserial primary key,
-//     name varchar(40) not null,
-//     surname varchar(60) not null,
-//     father_name varchar(40) not null,
-//     login varchar(100) not null unique,
-//     email varchar(100),
-//     password varchar(200) not null
-// );
+var (
+	deleteUserQuery = fmt.Sprintf(
+		`DELETE FROM %s WHERE %s = $1`,
+		usermodel.UserTable,
+		usermodel.SQL.ID,
+	)
+	insertUserQuery = fmt.Sprintf(
+		`INSERT INTO %s 
+			(%s,%s,%s,%s,%s,%s)
+		VALUES ($1,$2,$3,$4,$5,$6)
+		RETURNING %s`,
+		usermodel.UserTable,
+
+		usermodel.SQL.Name,
+		usermodel.SQL.Surname,
+		usermodel.SQL.FatherName,
+		usermodel.SQL.Login,
+		usermodel.SQL.Email,
+		usermodel.SQL.Password,
+
+		usermodel.SQL.ID,
+	)
+)
 
 func insertUserDTO(ctx context.Context, tx pgx.Tx, usr *usermodel.UserDTO, id *uint64) error {
 	err := tx.QueryRow(
 		ctx,
-		`INSERT INTO users 
-			(name,surname,father_name,login,email,password)
-		VALUES ($1,$2,$3,$4,$5,$6)
-		RETURNING id`,
+		insertUserQuery,
 		usr.Name,
 		usr.Surname,
 		pgtype.Text{String: string(usr.FatherName), Valid: usr.FatherName != ""},
@@ -43,8 +55,9 @@ func insertUserDTO(ctx context.Context, tx pgx.Tx, usr *usermodel.UserDTO, id *u
 func insertUserRoles(ctx context.Context, tx pgx.Tx, id uint64, roles []userfields.Role) error {
 	rows := make([][]interface{}, 0)
 	role_id := 0
+	query := fmt.Sprintf(`SELECT %s FROM %s WHERE %s = $1`, usermodel.SQL_ROLES.ID, usermodel.RolesTable, usermodel.SQL_ROLES.Role)
 	for _, r := range roles {
-		err := tx.QueryRow(ctx, `SELECT id FROM roles WHERE role = $1`, r).Scan(&role_id)
+		err := tx.QueryRow(ctx, query, r).Scan(&role_id)
 		if err != nil {
 			return userError(err, amiderrors.NewCause("scan role id query", "insertUserRoles", _PROVIDER))
 		}
@@ -52,8 +65,8 @@ func insertUserRoles(ctx context.Context, tx pgx.Tx, id uint64, roles []userfiel
 	}
 	_, err := tx.CopyFrom(
 		ctx,
-		pgx.Identifier{"user_roles"},
-		[]string{"user_id", "role_id"},
+		pgx.Identifier{usermodel.UserRolesTable},
+		[]string{usermodel.SQL_USER_ROLES.UserId.String(), usermodel.SQL_USER_ROLES.RoleId.String()},
 		pgx.CopyFromRows(rows),
 	)
 	if err != nil {
@@ -85,6 +98,6 @@ func (u *userStorage) InsertUser(ctx context.Context, usr *usermodel.UserDTO) (*
 
 func (u *userStorage) DeleteUser(ctx context.Context, userId uint64) error {
 	_, err := u.p.DB.
-		ExecContext(ctx, "DELETE FROM users WHERE id = $1", userId)
+		ExecContext(ctx, deleteUserQuery, userId)
 	return userError(err, amiderrors.NewCause("delete user query", "DeleteUser", _PROVIDER))
 }

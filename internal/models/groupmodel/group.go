@@ -14,7 +14,7 @@ type GroupDTO struct {
 	EducationStartDate  amidtime.Date             `json:"educationStartDate" db:"education_start_date"`
 	EducationYear       groupfields.EducationYear `json:"educationYear" db:"education_year"`
 	EducationFinishDate amidtime.Date             `json:"educationFinishDate" db:"education_finish_date"`
-	DepartmentId        uint64                    `json:"departmentId" db:"department_id"`
+	StudyDepartmentId   uint64                    `json:"studyDepartmentId" db:"department_id"`
 }
 
 func (g *GroupDTO) ValidatableVariables() []validate.Validatable {
@@ -38,6 +38,6 @@ func NewGroupDTO(
 		EducationStartDate:  educationStartDate,
 		EducationFinishDate: educationFinishDate,
 		EducationYear:       educationYear,
-		DepartmentId:        departmentId,
+		StudyDepartmentId:   departmentId,
 	}
 }

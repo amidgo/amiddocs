@@ -101,6 +101,12 @@ func KeyFuncOption(kf jwt.Keyfunc) Option {
 	}
 }
 
+func ContextKeyOption(key string) Option {
+	return func(c *jwtware.Config) {
+		c.ContextKey = key
+	}
+}
+
 func ErrorHandlerOption(errHandler func(c *fiber.Ctx, err error)) Option {
 	return func(c *jwtware.Config) {
 		c.ErrorHandler = errorHandler

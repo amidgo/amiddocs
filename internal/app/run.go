@@ -4,16 +4,21 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
+	"github.com/amidgo/amiddocs/internal/config"
 	"github.com/amidgo/amiddocs/internal/database/postgres/depstorage"
 	"github.com/amidgo/amiddocs/internal/database/postgres/doctempstorage"
 	"github.com/amidgo/amiddocs/internal/database/postgres/doctypestorage"
 	"github.com/amidgo/amiddocs/internal/database/postgres/groupstorage"
 	"github.com/amidgo/amiddocs/internal/database/postgres/reqstorage"
+	"github.com/amidgo/amiddocs/internal/database/postgres/rtokenstorage"
 	"github.com/amidgo/amiddocs/internal/database/postgres/stdocstorage"
 	"github.com/amidgo/amiddocs/internal/database/postgres/studentstorage"
 	"github.com/amidgo/amiddocs/internal/database/postgres/userstorage"
+	"github.com/amidgo/amiddocs/internal/docxreplacer"
 	"github.com/amidgo/amiddocs/internal/domain/departmentservice"
+	"github.com/amidgo/amiddocs/internal/domain/docgenerator"
 	"github.com/amidgo/amiddocs/internal/domain/doctempservice"
 	"github.com/amidgo/amiddocs/internal/domain/groupservice"
 	"github.com/amidgo/amiddocs/internal/domain/reqservice"
@@ -36,36 +41,31 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-const (
-	PORTENV     = "PORT"
-	HOSTENV     = "HOST"
-	DATABASEURL = "DATABASEURL"
-	PEMPATH     = "PEMPATH"
-	FILESPATH   = "FILESPATH"
-)
-
 func Run() {
-
+	os.Setenv("TZ", time.UTC.String())
+	config := config.LoadConfig()
 	// create base app fiber instance
 	app := fiber.New(
 		fiberconfig.Config(),
 	)
-
 	// set up config, fiber logger, cors
 	middleware.SetUpMiddleWare(app)
 
 	// create postgres instance
-	pg, err := postgres.New(os.Getenv(DATABASEURL))
+	pg, err := postgres.New(config.DatabaseURL())
 	if err != nil {
 		log.Fatal(err)
 	}
+	// testdata.Insert(config, pg)
+
 	// create bearer token middleware
-	jwtGen := jwtrs.New(os.Getenv(PEMPATH))
-	tokenFabric := jwttoken.NewTokenFabric(jwtGen)
+	jwtGen := jwtrs.New(config.Jwt.Pempath)
+	ware := jwtGen.Ware(jwtrs.ContextKeyOption(config.Jwt.Name))
+	tokenMaster := jwttoken.NewTokenMaster(jwtGen, config, ware)
 
 	// create encrypter
 	encrypter := encrypt.New(10)
-	// docxReplacer := docxreplacer.New()
+	docxReplacer := docxreplacer.New()
 
 	// initialize the repos
 	userRepo := userstorage.New(pg)
@@ -76,31 +76,34 @@ func Run() {
 	requestRepo := reqstorage.New(pg)
 	docTypeRepo := doctypestorage.New(pg)
 	docTempRepo := doctempstorage.New(pg)
+	rTokenRepo := rtokenstorage.New(time.Second*time.Duration(config.Jwt.RefreshTokenTime), pg)
 
 	// initialize services
 	groupService := groupservice.New(groupRepo, depRepo, groupRepo)
-	userService := userservice.New(userRepo, tokenFabric, userRepo, encrypter)
+	userService := userservice.New(userRepo, tokenMaster, userRepo, encrypter, rTokenRepo)
 	depService := departmentservice.New(depRepo, depRepo)
 	stDocService := stdocservice.New(stDocRepo)
-	studentService := studentservice.New(groupRepo, stDocRepo, userRepo, studentRepo, encrypter)
+	studentService := studentservice.New(groupRepo, stDocRepo, userRepo, studentRepo, depRepo, encrypter)
 	reqService := reqservice.New(depRepo, requestRepo, requestRepo, docTypeRepo)
 	doctempService := doctempservice.New(depRepo, docTypeRepo, docTempRepo, docTempRepo)
+	docGenService := docgenerator.New(docxReplacer, studentRepo, userRepo, requestRepo, docTempRepo)
 	_ = stDocService
 
-	fmt.Println(tokenFabric.TokenWithWrongExp())
+	fmt.Println(tokenMaster.TokenWithWrongExp())
 
-	ware := jwtGen.Ware()
-	// setUp handlers with routing
-	grouphandler.SetUp(app, ware, groupService, groupRepo)
-	userhandler.SetUp(app, ware, userService, userRepo)
-	departmenthandler.SetUp(app, ware, depService, depRepo)
-	studenthandler.SetUp(app, ware, studentService, studentRepo)
-	reqhandler.SetUp(app, ware, reqService, tokenFabric, requestRepo)
-	doctemphandler.SetUp(app, ware, doctempService)
-	//set up swagger
 	swagger.SetUp(app)
+	app.Use(fiberconfig.ClientTokenHandler(config.Server.Token))
+	// setUp handlers with routing
+	grouphandler.SetUp(app, tokenMaster, groupService, groupRepo)
+	userhandler.SetUp(app, tokenMaster, userService, userRepo)
+	departmenthandler.SetUp(app, tokenMaster, depService, depRepo)
+	studenthandler.SetUp(app, tokenMaster, studentService, studentRepo)
+	reqhandler.SetUp(app, tokenMaster, reqService, tokenMaster, requestRepo, docGenService)
+	doctemphandler.SetUp(app, tokenMaster, doctempService, docTempRepo)
+	//set up swagger
 
 	// start the server application
-	err = app.Listen(os.Getenv(HOSTENV) + ":" + os.Getenv(PORTENV))
+	addr := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
+	app.Listen(addr)
 	log.Fatal(err)
 }

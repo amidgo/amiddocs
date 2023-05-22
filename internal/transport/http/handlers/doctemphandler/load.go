@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/amidgo/amiddocs/internal/models/doctempmodel"
-	"github.com/amidgo/amiddocs/internal/models/reqmodel/reqfields"
+	"github.com/amidgo/amiddocs/internal/models/doctypemodel/doctypefields"
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,16 +19,14 @@ import (
 //	@Tags			document-templates
 //	@Accept			octet-stream
 //	@Produce		json
-//	@Param			depId		query		uint64					true	"department id"
-//	@Param			type		query		reqfields.DocumentType	true	"document type"
-//	@Param			document	formData	file					true	"document binary (.docx file)"
-//
-//	@Success		200			{object}	doctempmodel.DocumentTemplateDTO
+//	@Param			depId		query		uint64						true	"department id"
+//	@Param			type		query		doctypefields.DocumentType	true	"document type"
+//	@Param			document	formData	file						true	"document binary (.docx file)"
 //	@Failure		400			{object}	amiderrors.ErrorResponse
 //	@Failure		403			{object}	amiderrors.ErrorResponse
 //	@Failure		500			{object}	amiderrors.ErrorResponse
-//
 //	@Security		Bearer
+//	@Security		Token
 //	@Router			/document-templates/upload [post]
 func (h *docTempHandler) LoadTemplate(c *fiber.Ctx) error {
 	depId, err := strconv.ParseUint(c.Query("depId"), 10, 64)
@@ -53,10 +51,11 @@ func (h *docTempHandler) LoadTemplate(c *fiber.Ctx) error {
 	file, err := doc.Open()
 	defer file.Close()
 	document.ReadFrom(file)
-	template := doctempmodel.NewCreateDocTemplate(depId, reqfields.DocumentType(docType), document.Bytes())
-	tempDTO, err := h.tempSer.UploadTemplate(c.UserContext(), template)
+	template := doctempmodel.NewCreateDocTemplate(depId, doctypefields.DocumentType(docType), document.Bytes())
+	err = h.tempSer.SaveTemplate(c.UserContext(), template)
 	if err != nil {
 		return err
 	}
-	return c.Status(http.StatusCreated).JSON(tempDTO)
+	c.Status(http.StatusCreated)
+	return nil
 }

@@ -23,9 +23,9 @@ import (
 //	@Failure		403		{object}	amiderrors.ErrorResponse
 //	@Failure		500		{object}	amiderrors.ErrorResponse
 //	@Security		Bearer
+//	@Security		Token
 //	@Router			/groups/create [post]
 func (h *GroupHandler) CreateGroup(c *fiber.Ctx) error {
-
 	group := new(groupmodel.GroupDTO)
 	err := c.BodyParser(group)
 	if err != nil {
@@ -45,7 +45,7 @@ func (h *GroupHandler) CreateGroup(c *fiber.Ctx) error {
 }
 
 func validateGroup(group *groupmodel.GroupDTO) error {
-	if group.EducationStartDate.Time().After(group.EducationFinishDate.Time()) {
+	if group.EducationStartDate.T().After(group.EducationFinishDate.T()) {
 		return grouperror.INVALID_EDUCATION_DATE
 	}
 	err := validate.ValidateFields(group)

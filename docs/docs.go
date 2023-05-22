@@ -26,6 +26,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": []
+                    },
+                    {
+                        "Token": []
                     }
                 ],
                 "description": "enabled auto check unique name and shortName values",
@@ -46,7 +49,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/depmodel.DepartmentDTO"
+                            "$ref": "#/definitions/depmodel.CreateDepartmentDTO"
                         }
                     }
                 ],
@@ -80,6 +83,11 @@ const docTemplate = `{
         },
         "/departments/get-all": {
             "get": {
+                "security": [
+                    {
+                        "Token": []
+                    }
+                ],
                 "consumes": [
                     "application/json"
                 ],
@@ -115,8 +123,56 @@ const docTemplate = `{
                 }
             }
         },
+        "/departments/get-all-types": {
+            "get": {
+                "security": [
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "get all departments with them doc types",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "departments"
+                ],
+                "summary": "GetAllDepartmentsWithTypes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/depmodel.DepartmentTypes"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/departments/get-by-id": {
             "get": {
+                "security": [
+                    {
+                        "Token": []
+                    }
+                ],
                 "description": "return department dto by id in param",
                 "consumes": [
                     "application/json"
@@ -165,11 +221,74 @@ const docTemplate = `{
                 }
             }
         },
+        "/document-templates/get": {
+            "get": {
+                "security": [
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "returns raw file",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "document-templates"
+                ],
+                "summary": "get template document",
+                "parameters": [
+                    {
+                        "enum": [
+                            "STUDY_DOCUMENT_BUDGET",
+                            "STUDY_DOCUMENT_NO_BUDGET"
+                        ],
+                        "type": "string",
+                        "description": "document type",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "department id",
+                        "name": "departmentId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/document-templates/upload": {
             "post": {
                 "security": [
                     {
                         "Bearer": []
+                    },
+                    {
+                        "Token": []
                     }
                 ],
                 "description": "load or update template in files",
@@ -193,7 +312,8 @@ const docTemplate = `{
                     },
                     {
                         "enum": [
-                            "STUDY_DOCUMENT"
+                            "STUDY_DOCUMENT_BUDGET",
+                            "STUDY_DOCUMENT_NO_BUDGET"
                         ],
                         "type": "string",
                         "description": "document type",
@@ -210,12 +330,6 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/doctempmodel.DocumentTemplateDTO"
-                        }
-                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
@@ -242,6 +356,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": []
+                    },
+                    {
+                        "Token": []
                     }
                 ],
                 "description": "create group",
@@ -296,6 +413,11 @@ const docTemplate = `{
         },
         "/groups/get-by-id": {
             "get": {
+                "security": [
+                    {
+                        "Token": []
+                    }
+                ],
                 "description": "Get GroupDTO by Id",
                 "consumes": [
                     "application/json"
@@ -344,11 +466,224 @@ const docTemplate = `{
                 }
             }
         },
+        "/requests/by-department-id": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "get all description by dep id from query requires secretary access",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "requests"
+                ],
+                "summary": "DepartmentRequests",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "department id",
+                        "name": "depId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/reqmodel.RequestViewDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/requests/generate-document": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "returns document from request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "requests"
+                ],
+                "summary": "GenerateDocumentFromRequest",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "request id",
+                        "name": "reqId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/reqmodel.RequestViewDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/requests/my-requests": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "get user requests by id from jwt token",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "requests"
+                ],
+                "summary": "UserRequests",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/reqmodel.RequestDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/requests/send": {
             "post": {
                 "security": [
                     {
                         "Bearer": []
+                    },
+                    {
+                        "Token": []
                     }
                 ],
                 "description": "\"Send request to generate document\"",
@@ -377,7 +712,80 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/studentmodel.StudentDTO"
+                            "$ref": "#/definitions/reqmodel.RequestDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/requests/set-done": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "set request status done by req id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "requests"
+                ],
+                "summary": "SetRequestStatusDone",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "request id",
+                        "name": "reqId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/reqmodel.RequestViewDTO"
+                            }
                         }
                     },
                     "400": {
@@ -418,6 +826,9 @@ const docTemplate = `{
                 "security": [
                     {
                         "Bearer": []
+                    },
+                    {
+                        "Token": []
                     }
                 ],
                 "description": "create student",
@@ -484,6 +895,11 @@ const docTemplate = `{
         },
         "/students/get-by-id": {
             "get": {
+                "security": [
+                    {
+                        "Token": []
+                    }
+                ],
                 "description": "get student by id from query param",
                 "consumes": [
                     "application/json"
@@ -532,8 +948,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/students/info": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "get student by id from query param",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "students"
+                ],
+                "summary": "GetStudentByID",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/studentmodel.StudentDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/all": {
             "get": {
+                "security": [
+                    {
+                        "Token": []
+                    }
+                ],
                 "description": "get all users from database",
                 "consumes": [
                     "application/json"
@@ -566,6 +1036,11 @@ const docTemplate = `{
         },
         "/users/get-by-id": {
             "get": {
+                "security": [
+                    {
+                        "Token": []
+                    }
+                ],
                 "description": "return user by id from path",
                 "consumes": [
                     "application/json"
@@ -614,8 +1089,62 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/info": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "return user by id from path",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Return User",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/usermodel.UserDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/login": {
             "post": {
+                "security": [
+                    {
+                        "Token": []
+                    }
+                ],
                 "description": "login by login and password",
                 "consumes": [
                     "application/json"
@@ -660,11 +1189,71 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/refresh-token": {
+            "post": {
+                "security": [
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "refresh token by old token and user id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "refresh token",
+                "parameters": [
+                    {
+                        "description": "refresh dto with user id and old token",
+                        "name": "refreshdto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/rtokenmodel.RefreshDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/tokenmodel.TokenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/register": {
             "post": {
                 "security": [
                     {
                         "Bearer": []
+                    },
+                    {
+                        "Token": []
                     }
                 ],
                 "description": "register user, require createUserModel, email should be unique",
@@ -724,12 +1313,9 @@ const docTemplate = `{
                 }
             }
         },
-        "depmodel.DepartmentDTO": {
+        "depmodel.CreateDepartmentDTO": {
             "type": "object",
             "properties": {
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -738,17 +1324,59 @@ const docTemplate = `{
                 }
             }
         },
-        "doctempmodel.DocumentTemplateDTO": {
+        "depmodel.DepartmentDTO": {
             "type": "object",
             "properties": {
-                "departmentId": {
+                "id": {
                     "type": "integer"
                 },
-                "documentPath": {
+                "name": {
                     "type": "string"
+                }
+            }
+        },
+        "depmodel.DepartmentTypes": {
+            "type": "object",
+            "properties": {
+                "department": {
+                    "$ref": "#/definitions/depmodel.DepartmentDTO"
                 },
-                "documentType": {
-                    "$ref": "#/definitions/reqfields.DocumentType"
+                "types": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/doctypefields.DocumentType"
+                    }
+                }
+            }
+        },
+        "doctypefields.DocumentType": {
+            "type": "string",
+            "enum": [
+                "STUDY_DOCUMENT_BUDGET",
+                "STUDY_DOCUMENT_NO_BUDGET"
+            ],
+            "x-enum-varnames": [
+                "STUDY_DOCUMENT_BUDGET",
+                "STUDY_DOCUMENT_NO_BUDGET"
+            ]
+        },
+        "doctypemodel.DocumentTypeDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "refresh_time": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/userfields.Role"
+                    }
+                },
+                "type": {
+                    "$ref": "#/definitions/doctypefields.DocumentType"
                 }
             }
         },
@@ -766,9 +1394,6 @@ const docTemplate = `{
         "groupmodel.GroupDTO": {
             "type": "object",
             "properties": {
-                "departmentId": {
-                    "type": "integer"
-                },
                 "educationFinishDate": {
                     "type": "string"
                 },
@@ -789,17 +1414,11 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "studyDepartmentId": {
+                    "type": "integer"
                 }
             }
-        },
-        "reqfields.DocumentType": {
-            "type": "string",
-            "enum": [
-                "STUDY_DOCUMENT"
-            ],
-            "x-enum-varnames": [
-                "STUDY_DOCUMENT"
-            ]
         },
         "reqfields.Status": {
             "type": "string",
@@ -824,10 +1443,78 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "documentType": {
-                    "$ref": "#/definitions/reqfields.DocumentType"
+                    "$ref": "#/definitions/doctypefields.DocumentType"
+                }
+            }
+        },
+        "reqmodel.RequestDTO": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "date": {
+                    "type": "string"
+                },
+                "departmentId": {
+                    "type": "integer"
+                },
+                "documentType": {
+                    "$ref": "#/definitions/doctypemodel.DocumentTypeDTO"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "status": {
                     "$ref": "#/definitions/reqfields.Status"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "reqmodel.RequestViewDTO": {
+            "type": "object",
+            "properties": {
+                "documentCount": {
+                    "type": "integer"
+                },
+                "documentType": {
+                    "$ref": "#/definitions/doctypefields.DocumentType"
+                },
+                "fio": {
+                    "$ref": "#/definitions/reqmodel.fio"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/reqfields.Status"
+                }
+            }
+        },
+        "reqmodel.fio": {
+            "type": "object",
+            "properties": {
+                "fatherName": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                }
+            }
+        },
+        "rtokenmodel.RefreshDTO": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "integer"
                 }
             }
         },
@@ -846,6 +1533,9 @@ const docTemplate = `{
                 "orderNumber": {
                     "type": "string"
                 },
+                "studentId": {
+                    "type": "integer"
+                },
                 "studyStartDate": {
                     "type": "string"
                 }
@@ -855,19 +1545,50 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "document": {
-                    "$ref": "#/definitions/stdocmodel.StudentDocumentDTO"
+                    "type": "object",
+                    "properties": {
+                        "docNumber": {
+                            "type": "string"
+                        },
+                        "orderDate": {
+                            "type": "string"
+                        },
+                        "orderNumber": {
+                            "type": "string"
+                        },
+                        "studyStartDate": {
+                            "type": "string"
+                        }
+                    }
                 },
                 "groupName": {
                     "type": "string"
                 },
                 "user": {
-                    "$ref": "#/definitions/usermodel.CreateUserDTO"
+                    "type": "object",
+                    "properties": {
+                        "email": {
+                            "type": "string"
+                        },
+                        "fatherName": {
+                            "type": "string"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "surname": {
+                            "type": "string"
+                        }
+                    }
                 }
             }
         },
         "studentmodel.StudentDTO": {
             "type": "object",
             "properties": {
+                "department": {
+                    "$ref": "#/definitions/depmodel.DepartmentDTO"
+                },
                 "document": {
                     "$ref": "#/definitions/stdocmodel.StudentDocumentDTO"
                 },
@@ -886,6 +1607,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "accessToken": {
+                    "type": "string"
+                },
+                "refreshToken": {
                     "type": "string"
                 },
                 "roles": {
@@ -961,9 +1685,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "password": {
-                    "type": "string"
-                },
                 "roles": {
                     "type": "array",
                     "items": {
@@ -981,6 +1702,12 @@ const docTemplate = `{
             "description": "Bearer Token Auth",
             "type": "apiKey",
             "name": "Authorization",
+            "in": "header"
+        },
+        "Token": {
+            "description": "Client Token auth",
+            "type": "apiKey",
+            "name": "Token",
             "in": "header"
         }
     }

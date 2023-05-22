@@ -3,9 +3,9 @@ package grouphandler
 import (
 	"context"
 
-	"github.com/amidgo/amiddocs/internal/jwttoken"
 	"github.com/amidgo/amiddocs/internal/models/groupmodel"
 	"github.com/amidgo/amiddocs/internal/models/usermodel/userfields"
+	"github.com/amidgo/amiddocs/internal/transport/http/handlers"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -38,13 +38,13 @@ const (
 
 func SetUp(
 	app *fiber.App,
-	jwt func(c *fiber.Ctx) error,
+	jwt handlers.JwtManager,
 	groupS groupService,
 	groupP groupProvider,
 ) {
 	handler := &GroupHandler{groupS: groupS, groupP: groupP}
 	route := app.Group(_GROUP_PATH)
 
-	route.Post(_CREATE_GROUP, jwt, jwttoken.AdminAccess, handler.CreateGroup)
+	route.Post(_CREATE_GROUP, jwt.Ware(), jwt.AdminAccess, handler.CreateGroup)
 	route.Get(_GET_BY_ID, handler.GetGroupById)
 }

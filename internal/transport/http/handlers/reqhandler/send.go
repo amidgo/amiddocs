@@ -18,13 +18,14 @@ import (
 //	@Produce		json
 //	@Param			request	body		reqmodel.CreateRequestDTO	true	"request"
 //
-//	@Success		201		{object}	studentmodel.StudentDTO
+//	@Success		201		{object}	reqmodel.RequestDTO
 //	@Failure		400		{object}	amiderrors.ErrorResponse
 //	@Failure		401		{object}	amiderrors.ErrorResponse
 //	@Failure		403		{object}	amiderrors.ErrorResponse
 //	@Failure		404		{object}	amiderrors.ErrorResponse
 //	@Failure		500		{object}	amiderrors.ErrorResponse
 //	@Security		Bearer
+//	@Security		Token
 //	@Router			/requests/send [post]
 func (h *requestHandler) Send(c *fiber.Ctx) error {
 	createReqDTO := new(reqmodel.CreateRequestDTO)
@@ -48,9 +49,9 @@ func (h *requestHandler) Send(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	st, err := h.reqser.SendRequest(c.UserContext(), roles, createReqDTO)
+	rq, err := h.reqser.SendRequest(c.UserContext(), roles, createReqDTO)
 	if err != nil {
 		return err
 	}
-	return c.Status(http.StatusCreated).JSON(st)
+	return c.Status(http.StatusCreated).JSON(rq)
 }

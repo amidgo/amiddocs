@@ -24,6 +24,7 @@ import (
 //	@Failure		404		{object}	amiderrors.ErrorResponse
 //	@Failure		500		{object}	amiderrors.ErrorResponse
 //	@Security		Bearer
+//	@Security		Token
 //	@Router			/students/create [post]
 func (h *studentHandler) CreateStudent(c *fiber.Ctx) error {
 

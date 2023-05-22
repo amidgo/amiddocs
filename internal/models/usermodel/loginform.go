@@ -17,3 +17,7 @@ func NewLoginForm(login userfields.Login, password userfields.Password) *LoginFo
 func (l *LoginForm) ValidatableVariables() []validate.Validatable {
 	return []validate.Validatable{l.Login, l.Password}
 }
+
+func (l *LoginForm) Validate() error {
+	return validate.ValidateFields(l)
+}

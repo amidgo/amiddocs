@@ -10,7 +10,7 @@ import (
 
 func (s *departmentService) CreateDepartment(
 	ctx context.Context,
-	dep *depmodel.DepartmentDTO,
+	dep *depmodel.CreateDepartmentDTO,
 ) (*depmodel.DepartmentDTO, error) {
 
 	_, err := s.depProvider.DepartmentByName(ctx, dep.Name)
@@ -21,7 +21,8 @@ func (s *departmentService) CreateDepartment(
 	if !amiderrors.Is(err, departmenterror.DEPARMENT_NOT_FOUND) {
 		return nil, departmenterror.SHORT_NAME_EXIST
 	}
-	department, err := s.depRep.InsertDepartment(ctx, dep)
+	department := depmodel.NewDepartmentDTO(0, dep.Name, dep.ShortName)
+	department, err = s.depRep.InsertDepartment(ctx, department)
 	if err != nil {
 		return nil, err
 	}

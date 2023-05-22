@@ -17,6 +17,11 @@ import (
 //	@in							header
 //	@name						Authorization
 //	@description				Bearer Token Auth
+
+//	@securityDefinitions.apiKey	Token
+//	@in							header
+//	@name						Token
+//	@description				Client Token auth
 //
 //	@host						localhost:10101
 //	@BasePath					/

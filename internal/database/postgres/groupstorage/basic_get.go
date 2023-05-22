@@ -2,19 +2,50 @@ package groupstorage
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/amidgo/amiddocs/internal/models/groupmodel"
 	"github.com/amidgo/amiddocs/internal/models/groupmodel/groupfields"
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
+	"github.com/jackc/pgx/v5"
 )
 
-const (
-	_BASIC_GROUP_GET = `SELECT id,name,is_budget,education_form,education_start_date,education_year,education_finish_date,department_id FROM groups `
+var (
+	groupGetQuery = fmt.Sprintf(
+		`SELECT 
+		%s,%s,%s,%s,%s,%s,%s,%s
+		FROM %s
+		`,
+		groupmodel.SQL.ID,
+		groupmodel.SQL.Name,
+		groupmodel.SQL.IsBudget,
+		groupmodel.SQL.EducationForm,
+		groupmodel.SQL.EducationStartDate,
+		groupmodel.SQL.EducationYear,
+		groupmodel.SQL.EducationFinishDate,
+		groupmodel.SQL.StudyDepartmentId,
+
+		groupmodel.GroupTable,
+	)
 )
+
+func scanGroup(ctx context.Context, row pgx.Row, group *groupmodel.GroupDTO) error {
+	return row.Scan(
+		&group.ID,
+		&group.Name,
+		&group.IsBudget,
+		&group.EducationForm,
+		&group.EducationStartDate,
+		&group.EducationYear,
+		&group.EducationFinishDate,
+		&group.StudyDepartmentId,
+	)
+}
 
 func (g *groupStorage) getGroupByQuery(ctx context.Context, query string, args ...interface{}) (*groupmodel.GroupDTO, error) {
 	group := new(groupmodel.GroupDTO)
-	err := g.p.DB.GetContext(ctx, group, query, args...)
+	row := g.p.Pool.QueryRow(ctx, query, args...)
+	err := scanGroup(ctx, row, group)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +53,7 @@ func (g *groupStorage) getGroupByQuery(ctx context.Context, query string, args .
 }
 
 func (g *groupStorage) GroupById(ctx context.Context, id uint64) (*groupmodel.GroupDTO, error) {
-	group, err := g.getGroupByQuery(ctx, _BASIC_GROUP_GET+`WHERE id = $1`, id)
+	group, err := g.getGroupByQuery(ctx, groupGetQuery+` WHERE `+groupmodel.SQL.ID.String()+` = $1`, id)
 	if err != nil {
 		return nil, groupError(err, amiderrors.NewCause("group by id query", "GroupById", _PROVIDER))
 	}
@@ -30,7 +61,7 @@ func (g *groupStorage) GroupById(ctx context.Context, id uint64) (*groupmodel.Gr
 }
 
 func (g *groupStorage) GroupByName(ctx context.Context, name groupfields.Name) (*groupmodel.GroupDTO, error) {
-	group, err := g.getGroupByQuery(ctx, _BASIC_GROUP_GET+`WHERE name = $1`, name)
+	group, err := g.getGroupByQuery(ctx, groupGetQuery+` WHERE `+groupmodel.SQL.Name.String()+` = $1`, name)
 	if err != nil {
 		return nil, groupError(err, amiderrors.NewCause("group by name query", "GroupByName", _PROVIDER))
 	}

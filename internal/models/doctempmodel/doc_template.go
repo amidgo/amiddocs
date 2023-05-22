@@ -1,19 +1,19 @@
 package doctempmodel
 
 import (
-	"github.com/amidgo/amiddocs/internal/models/reqmodel/reqfields"
+	"github.com/amidgo/amiddocs/internal/models/doctypemodel/doctypefields"
 	"github.com/amidgo/amiddocs/pkg/validate"
 )
 
 type DocumentTemplateDTO struct {
-	DepartmentID uint64                 `json:"departmentId"`
-	DocumentType reqfields.DocumentType `json:"documentType"`
-	Document     []byte                 `json:"document"`
+	DepartmentID uint64                     `json:"departmentId"`
+	DocumentType doctypefields.DocumentType `json:"documentType"`
+	Document     []byte                     `json:"document"`
 }
 
 func NewCreateDocTemplate(
 	depID uint64,
-	docType reqfields.DocumentType,
+	docType doctypefields.DocumentType,
 	document []byte,
 ) *DocumentTemplateDTO {
 	return &DocumentTemplateDTO{

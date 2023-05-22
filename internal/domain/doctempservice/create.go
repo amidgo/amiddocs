@@ -1,6 +1,7 @@
 package doctempservice
 
 import (
+	"bytes"
 	"context"
 
 	"github.com/amidgo/amiddocs/internal/errorutils/doctemperror"
@@ -8,32 +9,32 @@ import (
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
 )
 
-func (s *doctempService) UploadTemplate(
+func (s *doctempService) SaveTemplate(
 	ctx context.Context,
 	template *doctempmodel.DocumentTemplateDTO,
-) (*doctempmodel.DocumentTemplateDTO, error) {
+) error {
 	_, err := s.depProv.DepartmentById(ctx, template.DepartmentID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	err = s.docTypeProv.DocTypeExists(ctx, template.DocumentType)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	temp, err := s.docTempProv.DocTemp(ctx, template.DepartmentID, template.DocumentType)
+	err = s.docTempProv.DocumentTemplate(ctx, &bytes.Buffer{}, template.DepartmentID, template.DocumentType)
 	if amiderrors.Is(err, doctemperror.DOC_TEMP_NOT_FOUND) {
-		temp, err = s.docTempServ.InsertDocTemp(ctx, template)
+		err = s.docTempServ.InsertDocTemp(ctx, template)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		return temp, nil
+		return nil
 	}
 	if err != nil {
-		return nil, err
+		return err
 	}
-	err = s.docTempServ.UpdateDocTemp(ctx, temp)
+	err = s.docTempServ.UpdateDocTemp(ctx, template)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return temp, nil
+	return nil
 }

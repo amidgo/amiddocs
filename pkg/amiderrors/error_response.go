@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -28,6 +29,21 @@ func (c *Cause) String() string {
 	return fmt.Sprintf(
 		"Action is %s, Method is %s, MethodProvider is %s",
 		c.Action, c.Method, c.MethodProvider,
+	)
+}
+
+func (e *ErrorResponse) String() string {
+	sCauses := make([]string, 0, len(e.Causes))
+	for _, cause := range e.Causes {
+		sCauses = append(sCauses, cause.String())
+	}
+	return fmt.Sprintf(
+		"Err is %v, Code %s, HttpCode %d, Raw %s\n Causes:\n %s",
+		e.Err,
+		e.Code,
+		e.HttpCode,
+		e.RawError,
+		strings.Join(sCauses, "\n"),
 	)
 }
 

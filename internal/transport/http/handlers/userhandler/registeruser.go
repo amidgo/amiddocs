@@ -19,8 +19,9 @@ import (
 //	@Failure		400		{object}	amiderrors.ErrorResponse
 //	@Failure		500		{object}	amiderrors.ErrorResponse
 //	@Security		Bearer
+//	@Security		Token
 //	@Router			/users/register [post]
-func (h *UserHandler) RegisterUser(c *fiber.Ctx) error {
+func (h *userHandler) RegisterUser(c *fiber.Ctx) error {
 
 	createUserDTO := new(usermodel.CreateUserDTO)
 	err := c.BodyParser(createUserDTO)

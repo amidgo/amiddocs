@@ -22,6 +22,7 @@ const _ID_Q = "id"
 //	@Failure		400	{object}	amiderrors.ErrorResponse
 //	@Failure		404	{object}	amiderrors.ErrorResponse
 //	@Failure		500	{object}	amiderrors.ErrorResponse
+//	@Security		Token
 //	@Router			/groups/get-by-id [get]
 func (h *GroupHandler) GetGroupById(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Query(_ID_Q, "0"), 10, 64)

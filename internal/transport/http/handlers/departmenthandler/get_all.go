@@ -15,9 +15,10 @@ import (
 //	@Success	200	{array}		depmodel.DepartmentDTO
 //	@Failure	400	{object}	amiderrors.ErrorResponse
 //	@Failure	500	{object}	amiderrors.ErrorResponse
+//	@Security	Token
 //	@Router		/departments/get-all [get]
-func (h *DepartmentHandler) GetAllDepartments(c *fiber.Ctx) error {
-	departmentList, err := h.depP.AllDepartments(c.UserContext())
+func (h *departmentHandler) GetAllDepartments(c *fiber.Ctx) error {
+	departmentList, err := h.depP.DepartmentList(c.UserContext())
 	if err != nil {
 		return err
 	}

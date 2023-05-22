@@ -13,7 +13,7 @@ func (s *groupService) CreateGroup(
 	group *groupmodel.GroupDTO,
 ) (*groupmodel.GroupDTO, error) {
 
-	_, err := s.depRep.DepartmentById(ctx, group.DepartmentId)
+	_, err := s.depRep.DepartmentById(ctx, group.StudyDepartmentId)
 	if err != nil {
 		return nil, err
 	}

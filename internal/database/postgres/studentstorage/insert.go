@@ -2,6 +2,7 @@ package studentstorage
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/amidgo/amiddocs/internal/models/stdocmodel"
 	"github.com/amidgo/amiddocs/internal/models/studentmodel"
@@ -12,11 +13,62 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+var (
+	insertUserQuery = fmt.Sprintf(
+		`INSERT INTO %s (%s,%s,%s,%s,%s,%s) VALUES ($1,$2,$3,$4,$5,$6) RETURNING %s`,
+		usermodel.UserTable,
+		usermodel.SQL.Name,
+		usermodel.SQL.Surname,
+		usermodel.SQL.FatherName,
+		usermodel.SQL.Login,
+		usermodel.SQL.Email,
+		usermodel.SQL.Password,
+		usermodel.SQL.ID,
+	)
+	insertStudentDocumentQuery = fmt.Sprintf(
+		`INSERT INTO %s (%s,%s,%s,%s,%s) VALUES ($1,$2,$3,$4,$5) RETURNING %s`,
+		// insert into student document table
+		stdocmodel.StudentDocumentTable,
+		// insert values
+		stdocmodel.SQL.StudentId,
+		stdocmodel.SQL.DocNumber,
+		stdocmodel.SQL.OrderNumber,
+		stdocmodel.SQL.OrderDate,
+		stdocmodel.SQL.EducationStartDate,
+		// returning id
+		stdocmodel.SQL.ID,
+	)
+
+	addRoleToUserQuery = fmt.Sprintf(
+		`INSERT INTO %s (%s,%s) VALUES ($1,(SELECT %s FROM %s WHERE %s = $2))`,
+		usermodel.UserRolesTable,
+		usermodel.SQL_USER_ROLES.UserId,
+		usermodel.SQL_USER_ROLES.RoleId,
+		usermodel.SQL_ROLES.ID,
+		usermodel.RolesTable,
+		usermodel.SQL_ROLES.Role,
+	)
+
+	insertStudentQuery = fmt.Sprintf(`
+	INSERT INTO %s
+		(%s,%s)
+		VALUES ($1,$2)
+	RETURNING %s
+	`,
+		// insert into student table
+		studentmodel.StudentTable,
+		// insert values
+		studentmodel.SQL.UserID,
+		studentmodel.SQL.GroupId,
+		// returning id
+		studentmodel.SQL.ID,
+	)
+)
+
 func insertUser(ctx context.Context, tx pgx.Tx, user *usermodel.UserDTO) error {
 	err := tx.QueryRow(
 		ctx,
-		`INSERT INTO users (name,surname,father_name,login,email,password)
-	 	VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
+		insertUserQuery,
 		user.Name,
 		user.Surname,
 		pgtype.Text{String: string(user.FatherName), Valid: user.FatherName != ""},
@@ -30,12 +82,12 @@ func insertUser(ctx context.Context, tx pgx.Tx, user *usermodel.UserDTO) error {
 func insertStDoc(ctx context.Context, tx pgx.Tx, document *stdocmodel.StudentDocumentDTO) error {
 	err := tx.QueryRow(
 		ctx,
-		`INSERT INTO student_documents (doc_number,order_number,order_date,study_start_date)
-		VALUES ($1,$2,$3,$4) RETURNING id`,
+		insertStudentDocumentQuery,
+		document.StudentId,
 		document.DocNumber,
 		document.OrderNumber,
 		document.OrderDate,
-		document.StudyStartDate,
+		document.EducationStartDate,
 	).Scan(&document.ID)
 	return err
 }
@@ -43,7 +95,7 @@ func insertStDoc(ctx context.Context, tx pgx.Tx, document *stdocmodel.StudentDoc
 func addStudentRoleToUser(ctx context.Context, tx pgx.Tx, userId uint64) error {
 	_, err := tx.Exec(
 		ctx,
-		`INSERT INTO user_roles (user_id, role_id) VALUES ($1,(SELECT roles.id FROM roles WHERE role = $2))`,
+		addRoleToUserQuery,
 		userId, userfields.STUDENT,
 	)
 	return err
@@ -59,19 +111,23 @@ func (s *studentStorage) InsertStudent(ctx context.Context, student *studentmode
 	if err != nil {
 		return nil, studentError(err, amiderrors.NewCause("insert user", "InsertStudent", _PROVIDER))
 	}
-	err = insertStDoc(ctx, tx, student.Document)
-	if err != nil {
-		return nil, studentError(err, amiderrors.NewCause("insert student document", "InsertStudent", _PROVIDER))
-	}
+
 	err = addStudentRoleToUser(ctx, tx, student.User.ID)
 	if err != nil {
 		return nil, studentError(err, amiderrors.NewCause("insert student role query", "InsertStudent", _PROVIDER))
 	}
 	err = tx.QueryRow(ctx,
-		`INSERT INTO students (user_id,group_id,student_document_id) VALUES ($1,$2,$3) RETURNING id`,
-		student.User.ID, student.Group.ID, student.Document.ID).Scan(&student.ID)
+		insertStudentQuery,
+		student.User.ID,
+		student.Group.ID,
+	).Scan(&student.ID)
 	if err != nil {
 		return nil, studentError(err, amiderrors.NewCause("student insert query", "InsertStudent", _PROVIDER))
+	}
+	student.Document.StudentId = student.ID
+	err = insertStDoc(ctx, tx, student.Document)
+	if err != nil {
+		return nil, studentError(err, amiderrors.NewCause("insert student document", "InsertStudent", _PROVIDER))
 	}
 	err = tx.Commit(ctx)
 	if err != nil {
