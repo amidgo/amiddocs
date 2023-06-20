@@ -29,7 +29,7 @@ func (h *GroupHandler) CreateGroup(c *fiber.Ctx) error {
 	group := new(groupmodel.GroupDTO)
 	err := c.BodyParser(group)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse body", "CreateGroup", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("parse body", "CreateGroup", _PROVIDER))
 	}
 
 	err = validateGroup(group)

@@ -4,14 +4,16 @@ import (
 	"net/http"
 
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
+	"github.com/amidgo/amiddocs/pkg/jwtrs"
 )
 
+const TOKEN_TYPE = jwtrs.TOKEN_TYPE
+
 var (
-	TOKEN_NOT_FOUND       = amiderrors.NewErrorResponse("token not found", http.StatusNotFound, "token_not_found")
-	TOKEN_EXPIRED         = amiderrors.NewErrorResponse("Время действия токена вышло", http.StatusUnauthorized, "token_expired")
-	STUDENTID_UNDEFINED   = amiderrors.NewErrorResponse("He удалось получить studentid при авторизации", http.StatusUnauthorized, "student_id_undefined")
-	ROLE_UNDEFINED        = amiderrors.NewErrorResponse("He удалось получить role при авторизации", http.StatusUnauthorized, "role_undefined")
-	USERID_UNDEFINED      = amiderrors.NewErrorResponse("He удалось получить userid при авторизации", http.StatusUnauthorized, "user_id_undefined")
-	REFRESH_TOKEN_EXPIRED = amiderrors.NewErrorResponse("refresh_token_expired", http.StatusUnauthorized, "refresh_token_expired")
-	FORBIDDEN             = amiderrors.NewErrorResponse("Нет доступа", http.StatusForbidden, "forbidden")
+	TOKEN_NOT_FOUND       = amiderrors.NewException(http.StatusNotFound, TOKEN_TYPE, "not_found")
+	STUDENTID_UNDEFINED   = amiderrors.NewException(http.StatusUnauthorized, TOKEN_TYPE, "student_id_undefined")
+	ROLE_UNDEFINED        = amiderrors.NewException(http.StatusUnauthorized, TOKEN_TYPE, "role_undefined")
+	USERID_UNDEFINED      = amiderrors.NewException(http.StatusUnauthorized, TOKEN_TYPE, "user_id_undefined")
+	REFRESH_TOKEN_EXPIRED = amiderrors.NewException(http.StatusUnauthorized, TOKEN_TYPE, "refresh_expired")
+	FORBIDDEN             = amiderrors.NewException(http.StatusForbidden, TOKEN_TYPE, "forbidden")
 )

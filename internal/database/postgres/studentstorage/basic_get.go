@@ -19,7 +19,7 @@ func getStudentQuery(query string) string {
 		`
 		SELECT 
 			%s,%s, %s, %s, %s, %s, %s, %s, array_agg(%s) as roles,
-			%s, %s, %s,%s, %s, %s,%s,%s,%s,%s,%s,%s,%s,
+			%s, %s, %s,%s, %s, %s,%s,%s,%s,%s,%s,%s,%s,%s,
 			%s, %s, %s, %s
 		FROM students 
 			INNER JOIN %s ON %s = %s 
@@ -59,6 +59,7 @@ func getStudentQuery(query string) string {
 		sqlutils.Full(depmodel.SQL.ID),
 		sqlutils.Full(depmodel.SQL.Name),
 		sqlutils.Full(depmodel.SQL.ShortName),
+		sqlutils.Full(depmodel.SQL.ImageUrl),
 
 		// inner join user table on student table by user id
 		usermodel.UserTable,
@@ -123,7 +124,7 @@ func scanStudent(row pgx.Row) (*studentmodel.StudentDTO, error) {
 		&group.ID,
 		&group.Name, &group.IsBudget, &group.EducationForm, &group.EducationStartDate,
 		&group.EducationYear, &group.EducationFinishDate, &group.StudyDepartmentId,
-		&deparment.ID, &deparment.Name, &deparment.ShortName,
+		&deparment.ID, &deparment.Name, &deparment.ShortName, &deparment.ImageUrl,
 	)
 	if err != nil {
 		return nil, err

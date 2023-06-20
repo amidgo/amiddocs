@@ -2,6 +2,7 @@ package amidstr
 
 import "math/rand"
 
+// return a random string with size
 func MakeString(size int) string {
 	if size == 0 {
 		return ""

@@ -2,6 +2,7 @@ package userservice
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/amidgo/amiddocs/internal/errorutils/tokenerror"
@@ -10,6 +11,7 @@ import (
 
 func (s *userService) RefreshToken(ctx context.Context, oldRefreshToken string, userId uint64) (*tokenmodel.TokenResponse, error) {
 	roles, err := s.userprov.UserRoles(ctx, userId)
+	fmt.Println(roles)
 	if err != nil {
 		return nil, err
 	}

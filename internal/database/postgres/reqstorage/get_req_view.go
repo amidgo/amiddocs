@@ -15,7 +15,7 @@ import (
 var (
 	getRequestViewList = fmt.Sprintf(
 		`
-		SELECT %s, %s, %s, %s, %s, %s, %s
+		SELECT %s, %s, %s, %s, %s, %s, %s, %s
 			FROM %s
 		INNER JOIN %s ON %s = %s
 		INNER JOIN %s ON %s = %s
@@ -33,6 +33,7 @@ var (
 		sqlutils.Full(reqmodel.SQL_STATUS.Status),
 		sqlutils.Full(doctypemodel.SQL.Type),
 		sqlutils.Full(reqmodel.SQL.Count),
+		sqlutils.Full(usermodel.SQL.ID),
 
 		// from request table
 		reqmodel.RequestTable,

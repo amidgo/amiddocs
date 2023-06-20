@@ -71,7 +71,7 @@ func (s *docTypeStorage) DocTypeRefreshTime(ctx context.Context, docType doctype
 		docType,
 	).Scan(&rTime)
 	if err != nil {
-		return 0, docTypeError(err, amiderrors.NewCause("get refresh type query with scan", "DocTypeRefreshTime", _PROVIDER))
+		return 0, DocTypeError(err, amiderrors.NewCause("get refresh type query with scan", "DocTypeRefreshTime", _PROVIDER))
 	}
 	return rTime, nil
 }
@@ -80,7 +80,7 @@ func (s *docTypeStorage) DocTypeExists(ctx context.Context, docType doctypefield
 	t := doctypefields.DocumentType("")
 	err := s.p.Pool.QueryRow(ctx, docTypeExistQuery, docType).Scan(&t)
 	if err != nil {
-		return docTypeError(err, amiderrors.NewCause("get doc type query", "DocTypeExists", _PROVIDER))
+		return DocTypeError(err, amiderrors.NewCause("get doc type query", "DocTypeExists", _PROVIDER))
 	}
 	return nil
 }
@@ -92,7 +92,7 @@ func (s *docTypeStorage) DocTypeByType(ctx context.Context, dtype doctypefields.
 		dtype,
 	).Scan(&docType.ID, &docType.Type, &docType.RefreshTime, &docType.Roles)
 	if err != nil {
-		return nil, docTypeError(err, amiderrors.NewCause("get doc type by type query", "DocTypeByType", _PROVIDER))
+		return nil, DocTypeError(err, amiderrors.NewCause("get doc type by type query", "DocTypeByType", _PROVIDER))
 	}
 	return docType, nil
 }

@@ -17,6 +17,8 @@ definitions:
     properties:
       id:
         type: integer
+      imageUrl:
+        type: string
       name:
         type: string
     type: object
@@ -159,30 +161,24 @@ definitions:
     type: object
   studentmodel.CreateStudentDTO:
     properties:
-      document:
-        properties:
-          docNumber:
-            type: string
-          orderDate:
-            type: string
-          orderNumber:
-            type: string
-          studyStartDate:
-            type: string
-        type: object
+      docNumber:
+        type: string
+      email:
+        type: string
+      fatherName:
+        type: string
       groupName:
         type: string
-      user:
-        properties:
-          email:
-            type: string
-          fatherName:
-            type: string
-          name:
-            type: string
-          surname:
-            type: string
-        type: object
+      name:
+        type: string
+      orderDate:
+        type: string
+      orderNumber:
+        type: string
+      studyStartDate:
+        type: string
+      surname:
+        type: string
     type: object
   studentmodel.StudentDTO:
     properties:
@@ -593,6 +589,46 @@ paths:
       - Bearer: []
       - Token: []
       summary: DepartmentRequests
+      tags:
+      - requests
+  /requests/cancel:
+    delete:
+      consumes:
+      - application/json
+      description: '"Delete request if status == SEND"'
+      parameters:
+      - description: request id
+        in: query
+        name: requestId
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/amiderrors.ErrorResponse'
+      security:
+      - Bearer: []
+      - Token: []
+      summary: Cancel request by id
       tags:
       - requests
   /requests/generate-document:

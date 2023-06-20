@@ -42,7 +42,7 @@ func (tf *TokenMaster) CreateAccessToken(userid uint64, roles []userfields.Role)
 	}
 	token, err := tf.j.CreateToken(claims.MapClaims)
 	if err != nil {
-		return "", amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("create token", "CreateAccessToken", _PROVIDER))
+		return "", amiderrors.Wrap(err, amiderrors.NewCause("create token", "CreateAccessToken", _PROVIDER))
 	}
 	return token, nil
 }
@@ -88,7 +88,7 @@ func (tf *TokenMaster) UserRoles(c *fiber.Ctx) ([]userfields.Role, error) {
 	claims := tf.Claims(c)
 	roles := claims.UserRoles()
 	if len(roles) == 0 {
-		return nil, amiderrors.NewInternalErrorResponse(errors.New("empty roles"), amiderrors.NewCause("get user roles", "UserRoles", _PROVIDER))
+		return nil, amiderrors.Wrap(errors.New("empty roles"), amiderrors.NewCause("get user roles", "UserRoles", _PROVIDER))
 	}
 	return roles, nil
 }

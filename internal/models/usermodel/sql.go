@@ -2,6 +2,9 @@ package usermodel
 
 const UserTable = "users"
 
+const UsersLoginUniqueConstraint = "users_login_unique"
+const UsersEmailUniqueConstraint = "users_email_unique"
+
 type user_column string
 
 func (u user_column) TableName() string {
@@ -55,6 +58,11 @@ var SQL_ROLES = sql_roles{
 
 const UserRolesTable = "user_roles"
 
+const (
+	ForeignKey_UserRoles__Roles = "fk_user_roles__roles"
+	ForeignKey_UserRoles__Users = "fk_user_roles__users"
+)
+
 type user_roles_column string
 
 func (ur user_roles_column) String() string {
@@ -65,11 +73,9 @@ func (ur user_roles_column) TableName() string {
 }
 
 var SQL_USER_ROLES = struct {
-	TABLE_NAME user_roles_column
-	UserId     user_roles_column
-	RoleId     user_roles_column
+	UserId user_roles_column
+	RoleId user_roles_column
 }{
-	TABLE_NAME: "user_roles",
-	UserId:     "user_id",
-	RoleId:     "role_id",
+	UserId: "user_id",
+	RoleId: "role_id",
 }

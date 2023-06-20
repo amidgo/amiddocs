@@ -50,7 +50,7 @@ func (s *doctempStorage) DocumentTemplate(
 	depID uint64,
 	docType doctypefields.DocumentType,
 ) error {
-	docTemplateDTO := new(doctempmodel.DocumentTemplateDTO)
+	docTemplateDTO := new(doctempmodel.CreateTemplateDTO)
 	docTemplateDTO.DepartmentID = depID
 	docTemplateDTO.DocumentType = docType
 	err := s.p.Pool.QueryRow(
@@ -59,11 +59,11 @@ func (s *doctempStorage) DocumentTemplate(
 		depID, docType,
 	).Scan(&docTemplateDTO.Document)
 	if err != nil {
-		return tempalateError(err, amiderrors.NewCause("get doc temp query", "DocTemplate", _PROVIDER))
+		return templateError(err, amiderrors.NewCause("get doc temp query", "DocTemplate", _PROVIDER))
 	}
 	_, err = wr.Write(docTemplateDTO.Document)
 	if err != nil {
-		return tempalateError(err, amiderrors.NewCause("write in io.Writer", "DocumentTemplate", _PROVIDER))
+		return templateError(err, amiderrors.NewCause("write in io.Writer", "DocumentTemplate", _PROVIDER))
 	}
 	return nil
 }

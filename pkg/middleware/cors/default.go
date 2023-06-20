@@ -1,7 +1,10 @@
 package cors
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+)
 
-func DefaultCors(app *fiber.App) {
-
+func SetUp(app *fiber.App) {
+	app.Use(cors.New(cors.ConfigDefault))
 }

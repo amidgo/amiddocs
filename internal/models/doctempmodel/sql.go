@@ -2,6 +2,11 @@ package doctempmodel
 
 const DocTempTable = "document_templates"
 
+const (
+	ForeignKey_DocumentTemplates__Departments   = "fk_document_templates__departments"
+	ForeignKey_DocumentTemplates__DocumentTypes = "fk_document_templates__document_types"
+)
+
 type doctemp_column string
 
 func (d doctemp_column) String() string {

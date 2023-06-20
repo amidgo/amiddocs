@@ -6,8 +6,10 @@ import (
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
 )
 
+const STUDENT_DOCUMENT_TYPE = "student_document"
+
 var (
-	DOC_NOT_FOUND      = amiderrors.NewErrorResponse("Студенческий билет не найден", http.StatusNotFound, "st_doc_not_found")
-	DOC_NUMBER_EXIST   = amiderrors.NewErrorResponse("Номер студенческого билета уже существует", http.StatusBadRequest, "doc_number_exist")
-	ORDER_NUMBER_EXIST = amiderrors.NewErrorResponse("Данный номер приказа уже используется", http.StatusBadRequest, "order_number_exist")
+	STUDENT_ALREADY_HAVE_DOCUMENT = amiderrors.NewException(http.StatusBadRequest, STUDENT_DOCUMENT_TYPE, "student_already_have_document")
+	DOC_NOT_FOUND                 = amiderrors.NewException(http.StatusNotFound, STUDENT_DOCUMENT_TYPE, "not_found")
+	DOC_NUMBER_EXIST              = amiderrors.NewException(http.StatusBadRequest, STUDENT_DOCUMENT_TYPE, "doc_number_exist")
 )

@@ -3,28 +3,50 @@ package amiderrors
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
-
-	"github.com/gofiber/fiber/v2"
 )
 
-type Code string
-
+// error which return transport layer to user
 type ErrorResponse struct {
-	Err      string   `json:"error"`
-	Code     Code     `json:"code"`
-	HttpCode int      `json:"-"`
-	RawError error    `json:"-"`
-	Causes   []*Cause `json:"-"`
+	Err  string `json:"error"`
+	Code string `json:"code"`
 }
 
+func NewErrorResponse(err, code string) *ErrorResponse {
+	return &ErrorResponse{Err: err, Code: code}
+}
+
+// error interface implementation
+func (e *ErrorResponse) Error() string {
+	return e.Err
+}
+
+// ComparableError interface implementation
+func (e *ErrorResponse) Equal(raw error) bool {
+	err, ok := raw.(*ErrorResponse)
+	if !ok {
+		return false
+	}
+	return e.Code == err.Code
+}
+
+// cause for additional error info
+// users dont see causes
+// causes use in logs
 type Cause struct {
 	Action         string
 	Method         string
 	MethodProvider string
 }
 
+func NewCause(action, method, methodProvider string) *Cause {
+	return &Cause{Action: action, Method: method, MethodProvider: methodProvider}
+}
+
+// Stringer implementation
+// return info of cause: action, method, method provider
 func (c *Cause) String() string {
 	return fmt.Sprintf(
 		"Action is %s, Method is %s, MethodProvider is %s",
@@ -32,74 +54,109 @@ func (c *Cause) String() string {
 	)
 }
 
-func (e *ErrorResponse) String() string {
+// main error struct of the project
+// users dont see exceptions, transport layer map it to ErrorResponse
+type Exception struct {
+	Err      error
+	Code     string
+	Type     string
+	HttpCode int
+	Causes   []*Cause
+}
+
+func NewException(httpcode int, etype string, code string) *Exception {
+	return &Exception{Code: code, Type: etype, HttpCode: httpcode, Causes: make([]*Cause, 0)}
+}
+
+// Stringer implementation,
+// return info of cause: err, code, httpcode for rest transport and list of causes if not empty
+func (e *Exception) String() string {
 	sCauses := make([]string, 0, len(e.Causes))
 	for _, cause := range e.Causes {
 		sCauses = append(sCauses, cause.String())
 	}
+	s := "empty"
+	if len(sCauses) > 0 {
+		s = "\n" + strings.Join(sCauses, "\n")
+	}
 	return fmt.Sprintf(
-		"Err is %v, Code %s, HttpCode %d, Raw %s\n Causes:\n %s",
+		"Err is %s, Code %s, HttpCode %d, Causes: %s",
 		e.Err,
-		e.Code,
+		MakeCode(e.Type, e.Code),
 		e.HttpCode,
-		e.RawError,
-		strings.Join(sCauses, "\n"),
+		s,
 	)
 }
 
-func NewCause(action, method, methodProvider string) *Cause {
-	return &Cause{Action: action, Method: method, MethodProvider: methodProvider}
-}
-
-func NewErrorResponse(err string, httpcode int, code Code) *ErrorResponse {
-	return &ErrorResponse{Err: err, Code: code, HttpCode: httpcode, Causes: make([]*Cause, 0)}
-}
-
-func NewInternalErrorResponse(raw error, cause *Cause) *ErrorResponse {
-	if raw == nil {
-		return nil
+// CError method
+// like String but require error config for error mapping
+func (e *Exception) CError(c *Config) string {
+	sCauses := make([]string, 0, len(e.Causes))
+	for _, cause := range e.Causes {
+		sCauses = append(sCauses, cause.String())
 	}
-	switch raw.(type) {
-	case *ErrorResponse:
-		return raw.(*ErrorResponse).WithCause(cause)
-	default:
-		return NewErrorResponse(raw.Error(), http.StatusInternalServerError, "internal").WithRaw(raw).WithCause(cause)
+	s := "empty"
+	if len(sCauses) > 0 {
+		s = "\n" + strings.Join(sCauses, "\n")
 	}
+	return fmt.Sprintf(
+		"Err is %s, Code %s, HttpCode %d, Internal %v Causes: %s",
+		c.ExceptionToResponse(e).Error(),
+		MakeCode(e.Type, e.Code),
+		e.HttpCode,
+		e.Err,
+		s,
+	)
 }
 
-func (e *ErrorResponse) WithRaw(raw error) *ErrorResponse {
-	e.RawError = raw
-	return e
+// CError with Fprint
+func (e *Exception) Fprint(c *Config, w io.Writer) {
+	fmt.Fprint(
+		w,
+		e.CError(c),
+	)
 }
 
-func (e *ErrorResponse) WithCause(cause *Cause) *ErrorResponse {
+// error interface implementation
+// return same the String() method
+func (e *Exception) Error() string {
+	return e.String()
+}
+
+// builder pattern implementation
+// set Err of Exception and return copy
+func (e Exception) WithErr(err error) *Exception {
+	e.Err = err
+	return &e
+}
+
+// builder pattern implementation
+// add Cause to Cause List of Exception and return copy
+func (e Exception) WithCause(cause *Cause) *Exception {
 	e.Causes = append(e.Causes, cause)
-	return e
+	return &e
 }
 
-func (e *ErrorResponse) SendWithFiber(c *fiber.Ctx) error {
-	return c.Status(e.HttpCode).JSON(e)
-}
-
-func (e *ErrorResponse) Error() string {
-	return e.Err
-}
-
+// wrap error with cause
+// if type of err is Excpetion then add cause to list and return error
+// default return new internal exception with err and cause
 func Wrap(err error, cause *Cause) error {
-	switch err.(type) {
-	case *ErrorResponse:
-		return err.(*ErrorResponse).WithCause(cause)
+	switch err := err.(type) {
+	case *Exception:
+		return err.WithCause(cause)
 	default:
-		return NewInternalErrorResponse(err, cause)
+		return NewException(http.StatusInternalServerError, "common", INTERNAL).WithErr(err).WithCause(cause)
 	}
 }
 
-func (e *ErrorResponse) Equal(raw error) bool {
-	err, ok := raw.(*ErrorResponse)
+// ComparableError interface implementation
+// Compare all fields
+func (e *Exception) Equal(raw error) bool {
+	err, ok := raw.(*Exception)
 	if !ok {
 		return false
 	}
-	if e.Err != err.Err {
+	if !errors.Is(e.Err, err.Err) {
 		return false
 	}
 	if e.Code != err.Code {
@@ -109,19 +166,4 @@ func (e *ErrorResponse) Equal(raw error) bool {
 		return false
 	}
 	return true
-}
-
-func Is(err1, err2 error) bool {
-	if err1 == nil {
-		return err2 == nil
-	}
-	if errors.Is(err1, err2) {
-		return true
-	}
-	switch err1.(type) {
-	case *ErrorResponse:
-		return err1.(*ErrorResponse).Equal(err2)
-	default:
-		return false
-	}
 }

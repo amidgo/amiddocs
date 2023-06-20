@@ -25,6 +25,7 @@ type docGenerator interface {
 type requestService interface {
 	UpdateRequestStatus(ctx context.Context, reqId uint64, status reqfields.Status) error
 	SendRequest(ctx context.Context, roles []userfields.Role, streq *reqmodel.CreateRequestDTO) (*reqmodel.RequestDTO, error)
+	DeleteRequest(ctx context.Context, userId, requestId uint64) error
 }
 
 type requestHandler struct {
@@ -41,12 +42,15 @@ const (
 	_GENERATE_DOCUMENT      = "/generate-document"
 	_REQUESTS_BY_DEPARTMENT = "/by-department-id"
 	_SET_DONE               = "/set-done"
+	_CANCEL                 = "/cancel"
 )
 
 func SetUp(app *fiber.App, jwt handlers.JwtManager, streqser requestService, jwtser handlers.JwtManager, reqprov requestProvider, docgen docGenerator) {
 
 	route := app.Group(_ROUTE_PATH)
 	handler := &requestHandler{reqser: streqser, jwtser: jwtser, reqprov: reqprov, docgen: docgen}
+
+	route.Delete(_CANCEL, jwt.Ware(), handler.CancelRequest)
 
 	route.Post(_SEND, jwt.Ware(), handler.Send)
 	route.Post(_GENERATE_DOCUMENT, jwt.Ware(), jwt.SecretaryAccess, handler.GenerateDocumentFromRequest)

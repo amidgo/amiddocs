@@ -6,6 +6,8 @@ import (
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
 )
 
+const STUDENT_TYPE = "student"
+
 var (
-	STUDENT_NOT_FOUND = amiderrors.NewErrorResponse("Студент не найден", http.StatusNotFound, "student_not_found")
+	STUDENT_NOT_FOUND = amiderrors.NewException(http.StatusNotFound, STUDENT_TYPE, "not_found")
 )

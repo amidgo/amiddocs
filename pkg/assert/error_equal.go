@@ -21,3 +21,12 @@ func ErrorNotEqual(t testing.TB, exp error, act error, message string) {
 		t.Fatalf(message+", actual %v equal %v", act, exp)
 	}
 }
+
+func AnyOf(t testing.TB, message string, act error, exp ...error) {
+	for _, e := range exp {
+		if errorEqual(act, e) {
+			return
+		}
+	}
+	t.Fatalf(message+", %s not one of %s", act, exp)
+}

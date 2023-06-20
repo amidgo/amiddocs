@@ -9,6 +9,6 @@ import (
 
 func SetUpMiddleWare(a *fiber.App) {
 	logger.SetUp(a)
-	cors.DefaultCors(a)
+	cors.SetUp(a)
 	recover.SetUp(a)
 }

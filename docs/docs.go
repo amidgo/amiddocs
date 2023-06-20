@@ -539,6 +539,70 @@ const docTemplate = `{
                 }
             }
         },
+        "/requests/cancel": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "\"Delete request if status == SEND\"",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "requests"
+                ],
+                "summary": "Cancel request by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "request id",
+                        "name": "requestId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/requests/generate-document": {
             "post": {
                 "security": [
@@ -1330,6 +1394,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "imageUrl": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 }
@@ -1544,42 +1611,32 @@ const docTemplate = `{
         "studentmodel.CreateStudentDTO": {
             "type": "object",
             "properties": {
-                "document": {
-                    "type": "object",
-                    "properties": {
-                        "docNumber": {
-                            "type": "string"
-                        },
-                        "orderDate": {
-                            "type": "string"
-                        },
-                        "orderNumber": {
-                            "type": "string"
-                        },
-                        "studyStartDate": {
-                            "type": "string"
-                        }
-                    }
+                "docNumber": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "fatherName": {
+                    "type": "string"
                 },
                 "groupName": {
                     "type": "string"
                 },
-                "user": {
-                    "type": "object",
-                    "properties": {
-                        "email": {
-                            "type": "string"
-                        },
-                        "fatherName": {
-                            "type": "string"
-                        },
-                        "name": {
-                            "type": "string"
-                        },
-                        "surname": {
-                            "type": "string"
-                        }
-                    }
+                "name": {
+                    "type": "string"
+                },
+                "orderDate": {
+                    "type": "string"
+                },
+                "orderNumber": {
+                    "type": "string"
+                },
+                "studyStartDate": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
                 }
             }
         },

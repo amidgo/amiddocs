@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/amidgo/amiddocs/internal/models/depmodel"
-	"github.com/amidgo/amiddocs/internal/models/usermodel/userfields"
 	"github.com/amidgo/amiddocs/internal/transport/http/handlers"
 	"github.com/gofiber/fiber/v2"
 )
@@ -24,9 +23,6 @@ type departmentProvider interface {
 	DepartmentListWithTypes(ctx context.Context) ([]*depmodel.DepartmentTypes, error)
 }
 
-type roleValidator interface {
-	ValidateRole(c *fiber.Ctx, role userfields.Role) error
-}
 type departmentHandler struct {
 	depS departmentService
 	depP departmentProvider

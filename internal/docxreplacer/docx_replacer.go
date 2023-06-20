@@ -25,16 +25,16 @@ func (r *docxReplacer) Replace(ctx context.Context, file []byte, wr io.Writer, r
 func replace(file []byte, wr io.Writer, replaceValues map[string]interface{}) error {
 	doc, err := docx.OpenBytes(file)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("open bytes", "Replace", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("open bytes", "Replace", _PROVIDER))
 	}
 	defer doc.Close()
 	err = doc.ReplaceAll(replaceValues)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("replace values", "Replace", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("replace values", "Replace", _PROVIDER))
 	}
 	err = doc.Write(wr)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("write to buffer", "Replace", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("write to buffer", "Replace", _PROVIDER))
 	}
 
 	return nil

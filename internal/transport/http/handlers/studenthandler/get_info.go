@@ -24,7 +24,7 @@ import (
 func (h *studentHandler) StudentInfo(c *fiber.Ctx) error {
 	id, err := h.jwt.UserID(c)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("get user id", "StudentInfo", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("get user id", "StudentInfo", _PROVIDER))
 	}
 	student, err := h.studentP.StudentByUserId(c.UserContext(), id)
 	if err != nil {

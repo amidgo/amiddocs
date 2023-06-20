@@ -2,6 +2,13 @@ package stdocmodel
 
 const StudentDocumentTable = "student_documents"
 
+const (
+	StudentDocumentsNumberUniqueConstraint    = "student_documents_number_unique"
+	StudentDocumentsStudentIdUniqueConstraint = "student_documents_student_id_unique"
+
+	ForeignKey_StudentDocuments__Students = "fk_student_documents__students"
+)
+
 type student_document_column string
 
 func (st student_document_column) String() string {

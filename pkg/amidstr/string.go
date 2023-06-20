@@ -1,18 +1,17 @@
 package amidstr
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 )
 
 func UnmarshalNullString(b []byte) (string, error) {
 	v := string(b)
+	v = strings.Trim(v, `"`)
 	switch v {
 	case "null":
 		return "", nil
 	default:
-		v = strings.Trim(v, `"`)
 		return v, nil
 	}
 }
@@ -25,12 +24,12 @@ func MarshalNullString(s string) ([]byte, error) {
 }
 
 func ScanNullString(src interface{}) (string, error) {
-	switch src.(type) {
+	switch src := src.(type) {
 	case nil:
 		return "", nil
 	case string:
-		return src.(string), nil
+		return src, nil
 	default:
-		return "", errors.New(fmt.Sprintf("cannot scan %T into *Email", src))
+		return "", fmt.Errorf("cannot scan %T into *Email", src)
 	}
 }

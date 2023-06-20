@@ -15,69 +15,82 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func lastrequestQuery(query string) string {
-	return fmt.Sprintf(
-		`
+var selectMaxQuery = fmt.Sprintf(`
+	SELECT 
+		%s, %s, max(%s) 
+	FROM 
+		%s
+	GROUP BY %s, %s`,
+	// selectable values
+	sqlutils.Full(reqmodel.SQL.UserID),
+	sqlutils.Full(reqmodel.SQL.DocumentTypeId),
+	// max date
+	sqlutils.Full(reqmodel.SQL.Date),
+
+	reqmodel.RequestTable,
+
+	// group by
+	sqlutils.Full(reqmodel.SQL.UserID),
+	sqlutils.Full(reqmodel.SQL.DocumentTypeId),
+)
+
+// first arg doc type
+// second arg user_id
+var lastrequestQuery = fmt.Sprintf(
+	`
 	SELECT %s,%s,%s,%s,%s,%s,%s,%s,%s,array_agg(%s)
 	FROM %s 
-		INNER JOIN (select max(%s) AS max_date from %s) AS r ON %s = r.max_date
 		INNER JOIN %s ON %s = %s
-		INNER JOIN %s ON %s = %s 
+		INNER JOIN %s ON %s = $1 
 		INNER JOIN %s ON %s = %s
 		INNER JOIN %s ON %s = %s
-	%s
+		INNER JOIN (%s) AS max_date ON max_date.%s = $2 AND max_date.%s = %s
 		GROUP BY %s, %s, %s
 	`,
-		// selectable variables
-		sqlutils.Full(reqmodel.SQL.ID),
-		sqlutils.Full(reqmodel.SQL_STATUS.Status),
-		sqlutils.Full(reqmodel.SQL.Count),
-		sqlutils.Full(reqmodel.SQL.Date),
-		sqlutils.Full(reqmodel.SQL.UserID),
-		sqlutils.Full(reqmodel.SQL.DepartmentID),
-		sqlutils.Full(doctypemodel.SQL.ID),
-		sqlutils.Full(doctypemodel.SQL.Type),
-		sqlutils.Full(doctypemodel.SQL.RefreshTime),
-		sqlutils.Full(usermodel.SQL_ROLES.Role),
+	// selectable variables
+	sqlutils.Full(reqmodel.SQL.ID),
+	sqlutils.Full(reqmodel.SQL_STATUS.Status),
+	sqlutils.Full(reqmodel.SQL.Count),
+	sqlutils.Full(reqmodel.SQL.Date),
+	sqlutils.Full(reqmodel.SQL.UserID),
+	sqlutils.Full(reqmodel.SQL.DepartmentID),
+	sqlutils.Full(doctypemodel.SQL.ID),
+	sqlutils.Full(doctypemodel.SQL.Type),
+	sqlutils.Full(doctypemodel.SQL.RefreshTime),
+	sqlutils.Full(usermodel.SQL_ROLES.Role),
 
-		// from requests
-		reqmodel.RequestTable,
+	// from requests
+	reqmodel.RequestTable,
 
-		// inner join on requests where date = max
-		sqlutils.Full(reqmodel.SQL.Date),
-		// from requests
-		reqmodel.RequestTable,
-		// on request date = max_date
-		sqlutils.Full(reqmodel.SQL.Date),
+	// inner join on doc type roles table by document_type_id
+	doctypemodel.DocTypeRoleTable,
+	sqlutils.Full(doctypemodel.SQL_ROLES.DocumentTypeId),
+	sqlutils.Full(reqmodel.SQL.DocumentTypeId),
 
-		// inner join on doc type roles table by document_type_id
-		doctypemodel.DocTypeRoleTable,
-		sqlutils.Full(doctypemodel.SQL_ROLES.DocumentTypeId),
-		sqlutils.Full(reqmodel.SQL.DocumentTypeId),
+	// inner join on doc types by document type = $1
+	doctypemodel.DocTypeTable,
+	sqlutils.Full(doctypemodel.SQL.Type),
 
-		// inner join on doc types by document type id
-		doctypemodel.DocTypeTable,
-		sqlutils.Full(reqmodel.SQL.DocumentTypeId),
-		sqlutils.Full(doctypemodel.SQL.ID),
+	// inner join roles
+	usermodel.RolesTable,
+	sqlutils.Full(usermodel.SQL_ROLES.ID),
+	sqlutils.Full(doctypemodel.SQL_ROLES.RoleId),
 
-		// inner join roles
-		usermodel.RolesTable,
-		sqlutils.Full(usermodel.SQL_ROLES.ID),
-		sqlutils.Full(doctypemodel.SQL_ROLES.RoleId),
+	// inner join request status
+	reqmodel.RequestStatusTable,
+	sqlutils.Full(reqmodel.SQL.StatusId),
+	sqlutils.Full(reqmodel.SQL_STATUS.ID),
 
-		// inner join request status
-		reqmodel.RequestStatusTable,
-		sqlutils.Full(reqmodel.SQL.StatusId),
-		sqlutils.Full(reqmodel.SQL_STATUS.ID),
-		// query
-		query,
+	selectMaxQuery,
+	reqmodel.SQL.UserID,
+	reqmodel.SQL.DocumentTypeId,
+	sqlutils.Full(doctypemodel.SQL.ID),
 
-		// group by columns
-		sqlutils.Full(reqmodel.SQL.ID),
-		sqlutils.Full(reqmodel.SQL_STATUS.Status),
-		sqlutils.Full(doctypemodel.SQL.ID),
-	)
-}
+	// group by columns
+	sqlutils.Full(reqmodel.SQL.ID),
+	sqlutils.Full(reqmodel.SQL_STATUS.Status),
+	sqlutils.Full(doctypemodel.SQL.ID),
+)
 
 func reqQuery(query string) string {
 	return fmt.Sprintf(
@@ -163,7 +176,8 @@ func (s *requestStorage) LastRequestByUserId(
 ) (*reqmodel.RequestDTO, error) {
 	req := new(reqmodel.RequestDTO)
 	req.DocumentType = new(doctypemodel.DocumentTypeDTO)
-	row := s.p.Pool.QueryRow(ctx, lastrequestQuery("WHERE requests.user_id = $1 AND document_types.type = $2"), userId, docType)
+	fmt.Println(lastrequestQuery)
+	row := s.p.Pool.QueryRow(ctx, lastrequestQuery, docType, userId)
 	err := scanRequest(row, req)
 	if err != nil {
 		return nil, requestError(err, amiderrors.NewCause("last req query scan", "LastRequestByUserId", _PROVIDER))

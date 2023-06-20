@@ -24,7 +24,7 @@ import (
 func (s *userHandler) UserInfo(c *fiber.Ctx) error {
 	id, err := s.jwt.UserID(c)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("get user id from claims", "UserInfo", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("get user id from claims", "UserInfo", _PROVIDER))
 	}
 	u, err := s.userP.UserById(c.UserContext(), id)
 	if err != nil {

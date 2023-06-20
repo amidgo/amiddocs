@@ -38,6 +38,11 @@ var SQL = doctype_table{
 
 const DocTypeRoleTable = "document_type_roles"
 
+const (
+	ForeignKey_DocumentTypeRoles__DocumentTypes = "fk_document_type_roles__document_types"
+	ForeignKey_DocumentTypeRoles__Roles         = "fk_document_type_roles__roles"
+)
+
 type doctype_roles_column string
 
 func (d doctype_roles_column) String() string {

@@ -25,7 +25,7 @@ import (
 func (h *studentHandler) GetStudentById(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Query("id"), 10, 64)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse body", "GetDocumentById", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("parse body", "GetDocumentById", _PROVIDER))
 	}
 	st, err := h.studentP.StudentById(c.UserContext(), id)
 	if err != nil {

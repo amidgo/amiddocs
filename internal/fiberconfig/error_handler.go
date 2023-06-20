@@ -2,20 +2,21 @@ package fiberconfig
 
 import (
 	"log"
-	"net/http"
 
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
 	"github.com/gofiber/fiber/v2"
 )
 
 func ErrorHandler(c *fiber.Ctx, err error) error {
-	switch err.(type) {
+	log.Printf("Url %s %s", c.OriginalURL(), err)
+	var httpCode int
+	switch err := err.(type) {
 	case *amiderrors.ErrorResponse:
-		err := err.(*amiderrors.ErrorResponse)
-		log.Printf("Url %s %s", c.OriginalURL(), err.String())
-		return c.Status(err.HttpCode).JSON(err)
+		httpCode = 400
+	case *amiderrors.Exception:
+		httpCode = err.HttpCode
 	default:
-		c.Status(http.StatusInternalServerError).Request().SetBodyString(err.Error())
-		return nil
+		httpCode = 500
 	}
+	return c.Status(httpCode).JSON(amiderrors.ErrorToResponse(err))
 }

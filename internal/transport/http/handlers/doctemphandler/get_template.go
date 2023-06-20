@@ -27,7 +27,7 @@ func (h *docTempHandler) GetTemplate(c *fiber.Ctx) error {
 	docType := doctypefields.DocumentType(c.Query("type"))
 	depId, err := strconv.ParseUint(c.Query("departmentId"), 10, 64)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse dep id", "GetTemplate", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("parse dep id", "GetTemplate", _PROVIDER))
 	}
 	err = h.tempProv.DocumentTemplate(c.UserContext(), c, depId, docType)
 	if err != nil {

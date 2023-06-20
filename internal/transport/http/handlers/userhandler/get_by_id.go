@@ -27,7 +27,7 @@ const _ID_Q = "id"
 func (h *userHandler) GetUserById(c *fiber.Ctx) error {
 	id, err := strconv.ParseUint(c.Query(_ID_Q, "word"), 10, 64)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse id", "GetUserById", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("parse id", "GetUserById", _PROVIDER))
 	}
 	usr, err := h.userP.UserById(c.UserContext(), id)
 	if err != nil {

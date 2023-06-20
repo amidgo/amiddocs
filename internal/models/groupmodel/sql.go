@@ -2,6 +2,11 @@ package groupmodel
 
 const GroupTable = "groups"
 
+const (
+	GroupNameUniqueConstraint           = "groups_name_unique"
+	ForeignKey_Groups__StudyDepartments = "fk_groups__study_departments"
+)
+
 type group_column string
 
 func (g group_column) String() string {

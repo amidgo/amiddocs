@@ -31,24 +31,30 @@ import (
 func (h *docTempHandler) LoadTemplate(c *fiber.Ctx) error {
 	depId, err := strconv.ParseUint(c.Query("depId"), 10, 64)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("get department id from query", "LoadTemplate", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("get department id from query", "LoadTemplate", _PROVIDER))
 	}
 	docType := c.Query("type")
 	if len(docType) == 0 {
-		return amiderrors.NewInternalErrorResponse(
+		return amiderrors.Wrap(
 			errors.New("missing doc type query"),
 			amiderrors.NewCause("get doctype from query", "LoadTemplate", _PROVIDER),
 		)
 	}
 	doc, err := c.FormFile("document")
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(
+		return amiderrors.Wrap(
 			errors.New("missing body"),
 			amiderrors.NewCause("get body", "LoadTemplate", _PROVIDER),
 		)
 	}
 	document := &bytes.Buffer{}
 	file, err := doc.Open()
+	if err != nil {
+		return amiderrors.Wrap(
+			err,
+			amiderrors.NewCause("open doc", "LoadTemplate", _PROVIDER),
+		)
+	}
 	defer file.Close()
 	document.ReadFrom(file)
 	template := doctempmodel.NewCreateDocTemplate(depId, doctypefields.DocumentType(docType), document.Bytes())

@@ -13,25 +13,45 @@ import (
 )
 
 type CreateStudentDTO struct {
-	User *struct {
-		Name       userfields.Name       `json:"name" db:"name"`
-		Surname    userfields.Surname    `json:"surname" db:"surname"`
-		FatherName userfields.FatherName `json:"fatherName" db:"father_name"`
-		Email      userfields.Email      `json:"email" db:"email"`
-	} `json:"user"`
-	Document *struct {
-		DocNumber          stdocfields.DocNumber   `json:"docNumber" db:"doc_number"`
-		OrderNumber        stdocfields.OrderNumber `json:"orderNumber" db:"order_number"`
-		OrderDate          amidtime.Date           `json:"orderDate" db:"order_date"`
-		EducationStartDate amidtime.Date           `json:"studyStartDate" db:"education_start_date"`
-	} `json:"document"`
-	GroupName groupfields.Name `json:"groupName"`
+	Name               userfields.Name         `json:"name" csv:"Имя"`
+	Surname            userfields.Surname      `json:"surname" csv:"Фамилия"`
+	FatherName         userfields.FatherName   `json:"fatherName" csv:"Отчество"`
+	Email              userfields.Email        `json:"email" csv:"-"`
+	DocNumber          stdocfields.DocNumber   `json:"docNumber" csv:"Номер Студ Билета"`
+	OrderNumber        stdocfields.OrderNumber `json:"orderNumber" csv:"Номер Приказа о зачислении"`
+	OrderDate          amidtime.Date           `json:"orderDate" csv:"Дата Приказа о Зачислении"`
+	EducationStartDate amidtime.Date           `json:"studyStartDate" csv:"Время Начала Обучения"`
+	GroupName          groupfields.Name        `json:"groupName" csv:"Группа"`
+}
+
+func NewCreateStudentDTO(
+	name userfields.Name,
+	surname userfields.Surname,
+	fatherName userfields.FatherName,
+	email userfields.Email,
+	docNumber stdocfields.DocNumber,
+	orderNumber stdocfields.OrderNumber,
+	orderDate amidtime.Date,
+	educationStartDate amidtime.Date,
+	groupName groupfields.Name,
+) *CreateStudentDTO {
+	return &CreateStudentDTO{
+		Name:               name,
+		Surname:            surname,
+		FatherName:         fatherName,
+		Email:              email,
+		DocNumber:          docNumber,
+		OrderNumber:        orderNumber,
+		OrderDate:          orderDate,
+		EducationStartDate: educationStartDate,
+		GroupName:          groupName,
+	}
 }
 
 func (c *CreateStudentDTO) ValidatableVariables() []validate.Validatable {
 	vars := make([]validate.Validatable, 0)
-	vars = append(vars, c.User.Name, c.User.Surname, c.User.FatherName, c.User.Email)
-	vars = append(vars, c.Document.DocNumber, c.Document.OrderNumber)
+	vars = append(vars, c.Name, c.Surname, c.FatherName, c.Email)
+	vars = append(vars, c.DocNumber, c.OrderNumber)
 	vars = append(vars, c.GroupName)
 	return vars
 }
@@ -48,17 +68,17 @@ func (student *CreateStudentDTO) StudentDTO(
 			0,
 			login,
 			password,
-			student.User.Name,
-			student.User.Surname,
-			student.User.FatherName,
-			student.User.Email,
+			student.Name,
+			student.Surname,
+			student.FatherName,
+			student.Email,
 			[]userfields.Role{userfields.STUDENT},
 		),
 		stdocmodel.NewStudentDocumentDTO(0, 0,
-			student.Document.DocNumber,
-			student.Document.OrderNumber,
-			student.Document.OrderDate,
-			student.Document.EducationStartDate,
+			student.DocNumber,
+			student.OrderNumber,
+			student.OrderDate,
+			student.EducationStartDate,
 		),
 		group,
 		department,

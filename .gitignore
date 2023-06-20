@@ -10,3 +10,7 @@
 /internal/testdata
 /testdata
 /main.go
+/log.txt
+/tokentest
+/Dockerfile.token
+/*.docx

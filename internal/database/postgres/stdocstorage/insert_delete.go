@@ -30,7 +30,7 @@ func (st *studentDocStorage) InsertDocument(ctx context.Context, doc *stdocmodel
 		doc.DocNumber, doc.OrderNumber, doc.OrderDate, doc.EducationStartDate,
 	).Scan(&doc.ID)
 	if err != nil {
-		return nil, studentDocumentError(err, amiderrors.NewCause("insert student query", "InsertDocument", _PROVIDER))
+		return nil, StudentDocumentError(err, amiderrors.NewCause("insert student query", "InsertDocument", _PROVIDER))
 	}
 	return doc, nil
 }

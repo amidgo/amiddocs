@@ -34,7 +34,7 @@ var (
 		sqlutils.Full(usermodel.SQL_USER_ROLES.UserId),
 
 		// group by columns
-		sqlutils.Full(usermodel.SQL_ROLES.ID),
+		sqlutils.Full(usermodel.SQL_USER_ROLES.UserId),
 	)
 )
 
@@ -109,12 +109,13 @@ func (u *userStorage) getUserByQuery(ctx context.Context, query string, args ...
 
 func (u *userStorage) UserRoles(ctx context.Context, userId uint64) ([]userfields.Role, error) {
 	roles := make([]userfields.Role, 0)
+	fmt.Println(userRolesQuery)
 	err := u.p.Pool.QueryRow(ctx,
 		userRolesQuery,
 		userId,
 	).Scan(&roles)
 	if err != nil {
-		return nil, userError(err, amiderrors.NewCause("user roles query row", "UserRoles", _PROVIDER))
+		return nil, UserError(err, amiderrors.NewCause("user roles query row", "UserRoles", _PROVIDER))
 	}
 	return roles, nil
 }
@@ -122,7 +123,7 @@ func (u *userStorage) UserRoles(ctx context.Context, userId uint64) ([]userfield
 func (u *userStorage) UserById(ctx context.Context, userId uint64) (*usermodel.UserDTO, error) {
 	usr, err := u.getUserByQuery(ctx, basicUserQuery(`WHERE `+sqlutils.Full(usermodel.SQL.ID)+` = $1`), userId)
 	if err != nil {
-		return nil, userError(err, amiderrors.NewCause("user by id query", "UserById", _PROVIDER))
+		return nil, UserError(err, amiderrors.NewCause("user by id query", "UserById", _PROVIDER))
 	}
 	return usr, nil
 }
@@ -130,7 +131,7 @@ func (u *userStorage) UserById(ctx context.Context, userId uint64) (*usermodel.U
 func (u *userStorage) UserByLogin(ctx context.Context, login userfields.Login) (*usermodel.UserDTO, error) {
 	usr, err := u.getUserByQuery(ctx, basicUserQuery(`WHERE `+sqlutils.Full(usermodel.SQL.Login)+` = $1`), login)
 	if err != nil {
-		return nil, userError(err, amiderrors.NewCause("user by login query", "UserByLogin", _PROVIDER))
+		return nil, UserError(err, amiderrors.NewCause("user by login query", "UserByLogin", _PROVIDER))
 	}
 	return usr, nil
 }
@@ -138,7 +139,7 @@ func (u *userStorage) UserByLogin(ctx context.Context, login userfields.Login) (
 func (u *userStorage) UserByEmail(ctx context.Context, email userfields.Email) (*usermodel.UserDTO, error) {
 	usr, err := u.getUserByQuery(ctx, basicUserQuery(`WHERE `+sqlutils.Full(usermodel.SQL.Email)+` = $1`), email)
 	if err != nil {
-		return nil, userError(err, amiderrors.NewCause("user by email query", "UserByEmail", _PROVIDER))
+		return nil, UserError(err, amiderrors.NewCause("user by email query", "UserByEmail", _PROVIDER))
 	}
 	return usr, nil
 }
@@ -147,14 +148,14 @@ func (u *userStorage) AllUsers(ctx context.Context) ([]*usermodel.UserDTO, error
 	userList := make([]*usermodel.UserDTO, 0)
 	q, err := u.p.Pool.Query(ctx, basicUserQuery(""))
 	if err != nil {
-		return nil, userError(err, amiderrors.NewCause("query all user", "AllUsers", _PROVIDER))
+		return nil, UserError(err, amiderrors.NewCause("query all user", "AllUsers", _PROVIDER))
 	}
 	defer q.Close()
 	for q.Next() {
 		user := new(usermodel.UserDTO)
 		err := scanUser(q, user)
 		if err != nil {
-			return nil, userError(err, amiderrors.NewCause(
+			return nil, UserError(err, amiderrors.NewCause(
 				fmt.Sprintf("scan user number %d", len(userList)),
 				"AllUsers",
 				_PROVIDER,

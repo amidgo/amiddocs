@@ -47,7 +47,7 @@ func insertUserDTO(ctx context.Context, tx pgx.Tx, usr *usermodel.UserDTO, id *u
 		usr.Password,
 	).Scan(id)
 	if err != nil {
-		return userError(err, amiderrors.NewCause("insert user dto", "InsertUser", _PROVIDER))
+		return UserError(err, amiderrors.NewCause("insert user dto", "InsertUser", _PROVIDER))
 	}
 	return nil
 }
@@ -59,7 +59,7 @@ func insertUserRoles(ctx context.Context, tx pgx.Tx, id uint64, roles []userfiel
 	for _, r := range roles {
 		err := tx.QueryRow(ctx, query, r).Scan(&role_id)
 		if err != nil {
-			return userError(err, amiderrors.NewCause("scan role id query", "insertUserRoles", _PROVIDER))
+			return UserError(err, amiderrors.NewCause("scan role id query", "insertUserRoles", _PROVIDER))
 		}
 		rows = append(rows, []interface{}{id, role_id})
 	}
@@ -70,7 +70,7 @@ func insertUserRoles(ctx context.Context, tx pgx.Tx, id uint64, roles []userfiel
 		pgx.CopyFromRows(rows),
 	)
 	if err != nil {
-		return userError(err, amiderrors.NewCause("insert user roles", "InsertUser", _PROVIDER))
+		return UserError(err, amiderrors.NewCause("insert user roles", "InsertUser", _PROVIDER))
 	}
 	return nil
 }
@@ -78,7 +78,7 @@ func insertUserRoles(ctx context.Context, tx pgx.Tx, id uint64, roles []userfiel
 func (u *userStorage) InsertUser(ctx context.Context, usr *usermodel.UserDTO) (*usermodel.UserDTO, error) {
 	tx, err := u.p.Pool.Begin(ctx)
 	if err != nil {
-		return nil, userError(err, amiderrors.NewCause("begin tx", "InsertUser", _PROVIDER))
+		return nil, UserError(err, amiderrors.NewCause("begin tx", "InsertUser", _PROVIDER))
 	}
 	defer tx.Rollback(ctx)
 	err = insertUserDTO(ctx, tx, usr, &usr.ID)
@@ -91,7 +91,7 @@ func (u *userStorage) InsertUser(ctx context.Context, usr *usermodel.UserDTO) (*
 	}
 	err = tx.Commit(ctx)
 	if err != nil {
-		return nil, userError(err, amiderrors.NewCause("commit transaction", "InsertUser", _PROVIDER))
+		return nil, UserError(err, amiderrors.NewCause("commit transaction", "InsertUser", _PROVIDER))
 	}
 	return usr, nil
 }
@@ -99,5 +99,5 @@ func (u *userStorage) InsertUser(ctx context.Context, usr *usermodel.UserDTO) (*
 func (u *userStorage) DeleteUser(ctx context.Context, userId uint64) error {
 	_, err := u.p.DB.
 		ExecContext(ctx, deleteUserQuery, userId)
-	return userError(err, amiderrors.NewCause("delete user query", "DeleteUser", _PROVIDER))
+	return UserError(err, amiderrors.NewCause("delete user query", "DeleteUser", _PROVIDER))
 }

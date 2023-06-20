@@ -29,6 +29,6 @@ func studentError(err error, cause *amiderrors.Cause) error {
 	case err == nil:
 		return nil
 	default:
-		return amiderrors.NewInternalErrorResponse(err, cause)
+		return amiderrors.Wrap(err, cause)
 	}
 }

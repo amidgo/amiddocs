@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/amidgo/amiddocs/internal/errorutils/grouperror"
 	"github.com/amidgo/amiddocs/internal/models/groupmodel"
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
 )
@@ -52,9 +53,16 @@ func (g *groupStorage) InsertGroup(ctx context.Context, group *groupmodel.GroupD
 }
 
 func (g *groupStorage) DeleteGroup(ctx context.Context, id uint64) error {
-	_, err := g.p.Pool.Exec(ctx, deleteGroupQuery, id)
+	cmdTag, err := g.p.Pool.Exec(ctx, deleteGroupQuery, id)
+	if cmdTag.RowsAffected() == 0 {
+		return grouperror.GROUP_NOT_FOUND
+	}
 	if err != nil {
 		return groupError(err, amiderrors.NewCause("delete group exec", "DeleteGroup", _PROVIDER))
 	}
+	return nil
+}
+
+func (s *groupStorage) InsertManyGroups(ctx context.Context, groupDTO []*groupmodel.GroupDTO) error {
 	return nil
 }

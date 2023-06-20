@@ -11,7 +11,7 @@ import (
 )
 
 type docTempService interface {
-	SaveTemplate(ctx context.Context, template *doctempmodel.DocumentTemplateDTO) error
+	SaveTemplate(ctx context.Context, template *doctempmodel.CreateTemplateDTO) error
 }
 
 type docTempProvider interface {

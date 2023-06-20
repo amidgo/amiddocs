@@ -2,6 +2,13 @@ package reqmodel
 
 const RequestTable = "requests"
 
+const (
+	ForeignKey_Requests__RequestStatus = "fk_requests__request_status"
+	ForeignKey_Requests__Users         = "fk_requests__users"
+	ForeignKey_Requests__Departments   = "fk_requests__departments"
+	ForeignKey_Requests__DocumentTypes = "fk_requests__document_types"
+)
+
 type request_column string
 
 func (r request_column) String() string {

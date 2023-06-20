@@ -29,6 +29,6 @@ func rtokenError(err error, cause *amiderrors.Cause) error {
 	case errors.Is(err, pgx.ErrNoRows):
 		return tokenerror.TOKEN_NOT_FOUND
 	default:
-		return amiderrors.NewInternalErrorResponse(err, cause)
+		return amiderrors.Wrap(err, cause)
 	}
 }

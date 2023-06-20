@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE departments DROP COLUMN photo;
+
+COMMIT;

@@ -32,7 +32,7 @@ func (h *requestHandler) Send(c *fiber.Ctx) error {
 
 	err := c.BodyParser(createReqDTO)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse body", "Send", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("parse body", "Send", _PROVIDER))
 	}
 
 	err = validate.ValidateFields(createReqDTO)

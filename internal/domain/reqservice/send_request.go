@@ -20,15 +20,8 @@ func (s *requestService) SendRequest(
 	roles []userfields.Role,
 	req *reqmodel.CreateRequestDTO,
 ) (*reqmodel.RequestDTO, error) {
-	_, err := s.depProv.DepartmentById(ctx, req.DepartmentID)
-	if err != nil {
-		return nil, amiderrors.
-			Wrap(
-				err,
-				amiderrors.NewCause("check department by id", "SendRequest", _PROVIDER),
-			)
-	}
-	err = s.checkRefreshTime(ctx, req.UserID, req.DocumentType)
+
+	err := s.checkRefreshTime(ctx, req.UserID, req.DocumentType)
 	if err != nil {
 		return nil, amiderrors.
 			Wrap(err, amiderrors.NewCause("check refresh time", "SendRequest", _PROVIDER))

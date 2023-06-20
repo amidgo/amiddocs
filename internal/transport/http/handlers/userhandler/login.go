@@ -25,7 +25,7 @@ func (h *userHandler) Login(c *fiber.Ctx) error {
 	loginForm := new(usermodel.LoginForm)
 	err := c.BodyParser(loginForm)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse body", "Login", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("parse body", "Login", _PROVIDER))
 	}
 	err = loginForm.Validate()
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/amidgo/amiddocs/internal/models/depmodel"
 	"github.com/amidgo/amiddocs/internal/models/doctempmodel"
+	"github.com/amidgo/amiddocs/internal/models/doctypemodel"
 	"github.com/amidgo/amiddocs/internal/models/doctypemodel/doctypefields"
 )
 
@@ -16,7 +17,7 @@ type departmentProvider interface {
 }
 
 type docTypeProvider interface {
-	DocTypeExists(ctx context.Context, docType doctypefields.DocumentType) error
+	DocTypeByType(ctx context.Context, docType doctypefields.DocumentType) (*doctypemodel.DocumentTypeDTO, error)
 }
 
 type docTempProvider interface {
@@ -25,7 +26,7 @@ type docTempProvider interface {
 
 type docTempService interface {
 	InsertDocTemp(ctx context.Context, template *doctempmodel.DocumentTemplateDTO) error
-	UpdateDocTemp(ctx context.Context, template *doctempmodel.DocumentTemplateDTO) error
+	UpdateDocTemp(ctx context.Context, template *doctempmodel.CreateTemplateDTO) error
 }
 
 type doctempService struct {

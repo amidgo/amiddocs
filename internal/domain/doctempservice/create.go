@@ -11,19 +11,11 @@ import (
 
 func (s *doctempService) SaveTemplate(
 	ctx context.Context,
-	template *doctempmodel.DocumentTemplateDTO,
+	template *doctempmodel.CreateTemplateDTO,
 ) error {
-	_, err := s.depProv.DepartmentById(ctx, template.DepartmentID)
-	if err != nil {
-		return err
-	}
-	err = s.docTypeProv.DocTypeExists(ctx, template.DocumentType)
-	if err != nil {
-		return err
-	}
-	err = s.docTempProv.DocumentTemplate(ctx, &bytes.Buffer{}, template.DepartmentID, template.DocumentType)
+	err := s.docTempProv.DocumentTemplate(ctx, &bytes.Buffer{}, template.DepartmentID, template.DocumentType)
 	if amiderrors.Is(err, doctemperror.DOC_TEMP_NOT_FOUND) {
-		err = s.docTempServ.InsertDocTemp(ctx, template)
+		err = s.InsertDocTemp(ctx, template)
 		if err != nil {
 			return err
 		}
@@ -33,6 +25,19 @@ func (s *doctempService) SaveTemplate(
 		return err
 	}
 	err = s.docTempServ.UpdateDocTemp(ctx, template)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *doctempService) InsertDocTemp(ctx context.Context, template *doctempmodel.CreateTemplateDTO) error {
+	docType, err := s.docTypeProv.DocTypeByType(ctx, template.DocumentType)
+	if err != nil {
+		return err
+	}
+	docTempDTO := doctempmodel.NewDocumentTemplateDTO(template.DepartmentID, docType.ID, template.Document)
+	err = s.docTempServ.InsertDocTemp(ctx, docTempDTO)
 	if err != nil {
 		return err
 	}

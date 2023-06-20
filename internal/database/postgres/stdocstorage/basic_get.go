@@ -49,7 +49,7 @@ func scanStudentDoc(row pgx.Row, doc *stdocmodel.StudentDocumentDTO) error {
 func (st *studentDocStorage) DocumentById(ctx context.Context, id uint64) (*stdocmodel.StudentDocumentDTO, error) {
 	doc, err := st.getDocumentByQuery(ctx, getStudentDocQuery+`WHERE `+stdocmodel.SQL.ID.String()+` = $1`, id)
 	if err != nil {
-		return nil, studentDocumentError(err, amiderrors.NewCause("document by id query", "DocumentById", _PROVIDER))
+		return nil, StudentDocumentError(err, amiderrors.NewCause("document by id query", "DocumentById", _PROVIDER))
 	}
 	return doc, nil
 }
@@ -57,7 +57,7 @@ func (st *studentDocStorage) DocumentById(ctx context.Context, id uint64) (*stdo
 func (st *studentDocStorage) DocumentByDocNumber(ctx context.Context, docNumber stdocfields.DocNumber) (*stdocmodel.StudentDocumentDTO, error) {
 	doc, err := st.getDocumentByQuery(ctx, getStudentDocQuery+`WHERE `+stdocmodel.SQL.DocNumber.String()+` = $1`, docNumber)
 	if err != nil {
-		return nil, studentDocumentError(err, amiderrors.NewCause("document by doc number", "DocumentByDocNumber", _PROVIDER))
+		return nil, StudentDocumentError(err, amiderrors.NewCause("document by doc number", "DocumentByDocNumber", _PROVIDER))
 	}
 	return doc, nil
 }
@@ -65,7 +65,7 @@ func (st *studentDocStorage) DocumentByDocNumber(ctx context.Context, docNumber 
 func (st *studentDocStorage) DocumentByOrderNumber(ctx context.Context, orderNumber stdocfields.OrderNumber) (*stdocmodel.StudentDocumentDTO, error) {
 	doc, err := st.getDocumentByQuery(ctx, getStudentDocQuery+`WHERE `+stdocmodel.SQL.OrderNumber.String()+` = $1`, orderNumber)
 	if err != nil {
-		return nil, studentDocumentError(err, amiderrors.NewCause("document by order number", "DocumentByOrderNumber", _PROVIDER))
+		return nil, StudentDocumentError(err, amiderrors.NewCause("document by order number", "DocumentByOrderNumber", _PROVIDER))
 	}
 	return doc, nil
 }

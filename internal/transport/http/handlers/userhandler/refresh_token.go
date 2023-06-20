@@ -26,7 +26,7 @@ func (h *userHandler) RefreshToken(c *fiber.Ctx) error {
 	token := new(rtokenmodel.RefreshDTO)
 	err := c.BodyParser(token)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse body", "RefreshToken", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("parse body", "RefreshToken", _PROVIDER))
 	}
 	rtokenResponse, err := h.userS.RefreshToken(c.UserContext(), token.Token.String(), token.UserId)
 	if err != nil {

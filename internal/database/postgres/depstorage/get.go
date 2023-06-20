@@ -15,17 +15,18 @@ import (
 
 var (
 	getDepQuery = fmt.Sprintf(
-		`SELECT %s, %s, %s FROM %s`,
+		`SELECT %s, %s, %s, %s FROM %s`,
 		depmodel.SQL.ID,
 		depmodel.SQL.Name,
 		depmodel.SQL.ShortName,
+		depmodel.SQL.ImageUrl,
 
 		depmodel.DepartmentTable,
 	)
 
 	getDepByUserId = fmt.Sprintf(
 		`
-		SELECT %s, %s, %s 
+		SELECT %s, %s, %s, %s
 			FROM %s
 		INNER JOIN %s ON %s = %s
 		INNER JOIN %s ON %s = %s
@@ -35,6 +36,7 @@ var (
 		sqlutils.Full(depmodel.SQL.ID),
 		sqlutils.Full(depmodel.SQL.Name),
 		sqlutils.Full(depmodel.SQL.ShortName),
+		sqlutils.Full(depmodel.SQL.ImageUrl),
 
 		depmodel.DepartmentTable,
 
@@ -67,6 +69,7 @@ func scanDep(row pgx.Row, dep *depmodel.DepartmentDTO) error {
 		&dep.ID,
 		&dep.Name,
 		&dep.ShortName,
+		&dep.ImageUrl,
 	)
 }
 

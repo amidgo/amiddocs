@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/amidgo/amiddocs/internal/models/studentmodel"
-	"github.com/amidgo/amiddocs/internal/models/usermodel/userfields"
 	"github.com/amidgo/amiddocs/internal/transport/http/handlers"
 	"github.com/gofiber/fiber/v2"
 )
@@ -25,10 +24,6 @@ type studentService interface {
 type studentProvider interface {
 	StudentByUserId(ctx context.Context, id uint64) (*studentmodel.StudentDTO, error)
 	StudentById(ctx context.Context, id uint64) (*studentmodel.StudentDTO, error)
-}
-
-type roleValidator interface {
-	ValidateRole(c *fiber.Ctx, role userfields.Role) error
 }
 
 type studentHandler struct {

@@ -28,7 +28,7 @@ import (
 func (h *requestHandler) DepartmentRequests(c *fiber.Ctx) error {
 	depId, err := strconv.ParseUint(c.Query("depId"), 10, 64)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse depId query", "DepartmentRequests", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("parse depId query", "DepartmentRequests", _PROVIDER))
 	}
 	reqList, err := h.reqprov.RequestListByDepartmentId(c.UserContext(), depId)
 	if err != nil {

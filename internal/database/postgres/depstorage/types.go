@@ -15,7 +15,7 @@ import (
 var (
 	depTypesQuery = fmt.Sprintf(
 		`
-		SELECT %s,%s,%s,array_agg(%s)
+		SELECT %s,%s,%s,%s,array_agg(%s)
 			FROM %s
 		INNER JOIN %s ON %s = %s
 		INNER JOIN %s ON %s = %s
@@ -26,6 +26,7 @@ var (
 		sqlutils.Full(depmodel.SQL.ID),
 		sqlutils.Full(depmodel.SQL.Name),
 		sqlutils.Full(depmodel.SQL.ShortName),
+		sqlutils.Full(depmodel.SQL.ImageUrl),
 		sqlutils.Full(doctypemodel.SQL.Type),
 		// from departments
 		depmodel.DepartmentTable,
@@ -53,6 +54,7 @@ func scanDepTypes(row pgx.Row, depTypes *depmodel.DepartmentTypes) error {
 		&dep.ID,
 		&dep.Name,
 		&dep.ShortName,
+		&dep.ImageUrl,
 		&depTypes.Types,
 	)
 }

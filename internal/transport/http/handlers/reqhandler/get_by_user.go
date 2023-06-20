@@ -27,7 +27,7 @@ import (
 func (h *requestHandler) MyRequests(c *fiber.Ctx) error {
 	id, err := h.jwtser.UserID(c)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("user id from token", "MyRequests", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("user id from token", "MyRequests", _PROVIDER))
 	}
 	reqList, err := h.reqprov.RequestListByUser(c.UserContext(), id)
 	if err != nil {

@@ -23,9 +23,9 @@ import (
 //	@Security		Token
 //	@Router			/departments/get-by-id [get]
 func (h *departmentHandler) GetDepartmentById(c *fiber.Ctx) error {
-	id, e := strconv.ParseUint(c.Query("id", "0"), 10, 64)
+	id, e := strconv.ParseUint(c.Query("id"), 10, 64)
 	if e != nil {
-		return amiderrors.NewInternalErrorResponse(e, amiderrors.NewCause("parse id", "GetDepartmentById", _PROVIDER)).SendWithFiber(c)
+		return amiderrors.Wrap(e, amiderrors.NewCause("parse id", "GetDepartmentById", _PROVIDER))
 	}
 
 	dep, err := h.depP.DepartmentById(c.UserContext(), id)

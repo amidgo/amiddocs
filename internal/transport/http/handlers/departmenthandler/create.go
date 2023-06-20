@@ -29,7 +29,7 @@ func (h *departmentHandler) CreateDepartment(c *fiber.Ctx) error {
 	dep := new(depmodel.CreateDepartmentDTO)
 	err := c.BodyParser(dep)
 	if err != nil {
-		amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse body", "CreateDepartment", _PROVIDER))
+		amiderrors.Wrap(err, amiderrors.NewCause("parse body", "CreateDepartment", _PROVIDER))
 	}
 
 	err = validate.ValidateFields(dep)

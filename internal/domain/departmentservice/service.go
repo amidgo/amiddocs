@@ -3,12 +3,14 @@ package departmentservice
 import (
 	"context"
 
+	"github.com/amidgo/amiddocs/internal/filestorage"
 	"github.com/amidgo/amiddocs/internal/models/depmodel"
 	"github.com/amidgo/amiddocs/internal/models/depmodel/depfields"
 )
 
 type departmentRepository interface {
 	InsertDepartment(ctx context.Context, dep *depmodel.DepartmentDTO) (*depmodel.DepartmentDTO, error)
+	UpdateDepartmentPhoto(ctx context.Context, id uint64, imageUrl depfields.ImageUrl) error
 }
 
 type departmentProvider interface {
@@ -21,8 +23,9 @@ type departmentProvider interface {
 type departmentService struct {
 	depRep      departmentRepository
 	depProvider departmentProvider
+	depFS       filestorage.FileStorage
 }
 
-func New(depRep departmentRepository, depProvider departmentProvider) *departmentService {
-	return &departmentService{depRep: depRep, depProvider: depProvider}
+func New(depRep departmentRepository, depProvider departmentProvider, depFS filestorage.FileStorage) *departmentService {
+	return &departmentService{depRep: depRep, depProvider: depProvider, depFS: depFS}
 }

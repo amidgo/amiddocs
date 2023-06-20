@@ -27,6 +27,7 @@ import (
 	"github.com/amidgo/amiddocs/internal/domain/userservice"
 	"github.com/amidgo/amiddocs/internal/encrypt"
 	"github.com/amidgo/amiddocs/internal/fiberconfig"
+	"github.com/amidgo/amiddocs/internal/filestorage"
 	"github.com/amidgo/amiddocs/internal/jwttoken"
 	"github.com/amidgo/amiddocs/internal/swagger"
 	"github.com/amidgo/amiddocs/internal/transport/http/handlers/departmenthandler"
@@ -35,6 +36,7 @@ import (
 	"github.com/amidgo/amiddocs/internal/transport/http/handlers/reqhandler"
 	"github.com/amidgo/amiddocs/internal/transport/http/handlers/studenthandler"
 	"github.com/amidgo/amiddocs/internal/transport/http/handlers/userhandler"
+	"github.com/amidgo/amiddocs/pkg/amiderrors"
 	"github.com/amidgo/amiddocs/pkg/jwtrs"
 	"github.com/amidgo/amiddocs/pkg/middleware"
 	"github.com/amidgo/amiddocs/pkg/postgres"
@@ -42,8 +44,12 @@ import (
 )
 
 func Run() {
+	// set unix time
 	os.Setenv("TZ", time.UTC.String())
+	// load config from config/config.yaml
 	config := config.LoadConfig()
+	// load errors from config/error/ru.yaml file
+	amiderrors.Init("config/error/ru.yaml")
 	// create base app fiber instance
 	app := fiber.New(
 		fiberconfig.Config(),
@@ -56,7 +62,10 @@ func Run() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// testdata.Insert(config, pg)
+
+	// filestorage module
+	os.Mkdir(config.FileStorage.Root, os.ModePerm)
+	depFileStorage := filestorage.NewDepFileStorage(app, config.FileStorage.DepFileStorage)
 
 	// create bearer token middleware
 	jwtGen := jwtrs.New(config.Jwt.Pempath)
@@ -81,18 +90,20 @@ func Run() {
 	// initialize services
 	groupService := groupservice.New(groupRepo, depRepo, groupRepo)
 	userService := userservice.New(userRepo, tokenMaster, userRepo, encrypter, rTokenRepo)
-	depService := departmentservice.New(depRepo, depRepo)
+	depService := departmentservice.New(depRepo, depRepo, depFileStorage)
 	stDocService := stdocservice.New(stDocRepo)
-	studentService := studentservice.New(groupRepo, stDocRepo, userRepo, studentRepo, depRepo, encrypter)
+	studentService := studentservice.New(groupRepo, stDocRepo, userRepo, studentRepo, studentRepo, depRepo, encrypter)
 	reqService := reqservice.New(depRepo, requestRepo, requestRepo, docTypeRepo)
 	doctempService := doctempservice.New(depRepo, docTypeRepo, docTempRepo, docTempRepo)
 	docGenService := docgenerator.New(docxReplacer, studentRepo, userRepo, requestRepo, docTempRepo)
 	_ = stDocService
 
-	fmt.Println(tokenMaster.TokenWithWrongExp())
-
+	// set up swagger route
 	swagger.SetUp(app)
+
+	// add client token check
 	app.Use(fiberconfig.ClientTokenHandler(config.Server.Token))
+
 	// setUp handlers with routing
 	grouphandler.SetUp(app, tokenMaster, groupService, groupRepo)
 	userhandler.SetUp(app, tokenMaster, userService, userRepo)
@@ -104,6 +115,7 @@ func Run() {
 
 	// start the server application
 	addr := fmt.Sprintf("%s:%d", config.Server.Host, config.Server.Port)
+
+	// app start
 	app.Listen(addr)
-	log.Fatal(err)
 }

@@ -13,6 +13,8 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+// load key from pempath attribute
+// return rsa key or log.Fatal(err)
 func loadKey(pempath string) *rsa.PrivateKey {
 	b, err := os.ReadFile(pempath)
 	if err != nil {
@@ -25,17 +27,21 @@ func loadKey(pempath string) *rsa.PrivateKey {
 	return key
 }
 
+// RS jwt struct
 type RsJWT struct {
 	pempath string
 	key     *rsa.PrivateKey
 }
 
+// return *RsJWT
+// load key by pem path
 func New(pempath string) *RsJWT {
 	r := RsJWT{pempath: pempath}
 	r.key = loadKey(pempath)
 	return &r
 }
 
+// create token with jwt
 func (r *RsJWT) CreateToken(claims jwt.MapClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	t, err := token.SignedString(r.key)
@@ -45,30 +51,40 @@ func (r *RsJWT) CreateToken(claims jwt.MapClaims) (string, error) {
 	return t, nil
 }
 
-var TOKEN_EXPIRED = amiderrors.NewErrorResponse("Время действия токена вышло", http.StatusUnauthorized, "token_expired")
+const TOKEN_TYPE = "token"
 
+// token expired error
+var TOKEN_EXPIRED = amiderrors.NewException(http.StatusUnauthorized, TOKEN_TYPE, "expired")
+
+// error handler with amiderrors.ErrorResponse support
+// if type err is *jwt.ValidationError try convert err.Inner to amiderrors.ErrorResponse
+// default amiderrors.NewErrorResponse(err.Error(), http.StatusBadRequest, "token_error")
 func errorHandler(c *fiber.Ctx, err error) error {
-	switch err.(type) {
+	switch err := err.(type) {
+	case *amiderrors.Exception:
+		return err
 	case *amiderrors.ErrorResponse:
-		return err.(*amiderrors.ErrorResponse)
+		return err
 	case *jwt.ValidationError:
-		jwtErr := err.(*jwt.ValidationError)
-		if amidErr, ok := jwtErr.Inner.(*amiderrors.ErrorResponse); ok {
+		jwtErr := err
+		if amidErr, ok := jwtErr.Inner.(*amiderrors.Exception); ok {
 			return amidErr
 		}
-		return amiderrors.NewErrorResponse(err.Error(), http.StatusBadRequest, "token_error")
+		return amiderrors.NewException(http.StatusBadRequest, TOKEN_TYPE, amiderrors.INTERNAL)
 	default:
-		return amiderrors.NewErrorResponse(err.Error(), http.StatusBadRequest, "token_error")
+		return amiderrors.NewException(http.StatusBadRequest, TOKEN_TYPE, amiderrors.INTERNAL)
 	}
 }
 
+// default keyfunc
+// check alg, exp properties
 func (r *RsJWT) keyFunc(t *jwt.Token) (interface{}, error) {
 	if t.Method.Alg() != jwtware.RS256 {
-		return nil, amiderrors.NewErrorResponse("wrong token", http.StatusUnauthorized, "wrong_token_sign_method")
+		return nil, amiderrors.NewException(http.StatusUnauthorized, TOKEN_TYPE, "wrong_sign")
 	}
 	mclaims, ok := t.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, amiderrors.NewErrorResponse("token_error", http.StatusUnauthorized, "token_error")
+		return nil, amiderrors.NewException(http.StatusUnauthorized, TOKEN_TYPE, amiderrors.INTERNAL)
 	}
 	unix := mclaims["exp"].(float64)
 	tm := time.Unix(int64(unix), 0)
@@ -78,6 +94,7 @@ func (r *RsJWT) keyFunc(t *jwt.Token) (interface{}, error) {
 	return r.key.Public(), nil
 }
 
+// default ware with option support
 func (r *RsJWT) Ware(opts ...Option) func(c *fiber.Ctx) error {
 	c := &jwtware.Config{
 		SigningMethod: jwtware.RS256,
@@ -91,8 +108,10 @@ func (r *RsJWT) Ware(opts ...Option) func(c *fiber.Ctx) error {
 	return jwtware.New(*c)
 }
 
+// jwt ware option
 type Option func(*jwtware.Config)
 
+// jwt ware type
 type JwtWare func(opts ...Option) func(*fiber.Ctx) error
 
 func KeyFuncOption(kf jwt.Keyfunc) Option {

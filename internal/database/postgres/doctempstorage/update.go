@@ -42,14 +42,14 @@ var (
 	)
 )
 
-func (s *doctempStorage) UpdateDocTemp(ctx context.Context, doctemp *doctempmodel.DocumentTemplateDTO) error {
+func (s *doctempStorage) UpdateDocTemp(ctx context.Context, doctemp *doctempmodel.CreateTemplateDTO) error {
 	fmt.Println(updateDocTempQuery)
 	_, err := s.p.Pool.Exec(ctx,
 		updateDocTempQuery,
 		doctemp.Document, doctemp.DepartmentID, doctemp.DocumentType,
 	)
 	if err != nil {
-		return tempalateError(err, amiderrors.NewCause("udpate doc tepmlate", "UpdateDocTemp", _PROVIDER))
+		return templateError(err, amiderrors.NewCause("udpate doc tepmlate", "UpdateDocTemp", _PROVIDER))
 	}
 	return nil
 }

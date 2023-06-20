@@ -23,6 +23,7 @@ type requestProvider interface {
 type requestRepository interface {
 	InsertRequest(ctx context.Context, req *reqmodel.RequestDTO) (*reqmodel.RequestDTO, error)
 	UpdateRequestStatus(ctx context.Context, reqId uint64, status reqfields.Status) error
+	DeleteRequest(ctx context.Context, requestId uint64) error
 }
 type docTypeProvider interface {
 	DocTypeByType(ctx context.Context, dtype doctypefields.DocumentType) (*doctypemodel.DocumentTypeDTO, error)

@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type ServerConfig struct {
@@ -31,11 +31,17 @@ type TLS struct {
 	Key  string `yaml:"key"`
 }
 
+type FileStorage struct {
+	DepFileStorage string `yaml:"department_file_storage"`
+	Root           string `yaml:"root"`
+}
+
 type Config struct {
-	Server   *ServerConfig   `yaml:"server"`
-	Database *PostgresConfig `yaml:"postgres"`
-	Jwt      *JwtConfig      `yaml:"jwt"`
-	TLS      *TLS            `yaml:"tls"`
+	Server      *ServerConfig   `yaml:"server"`
+	Database    *PostgresConfig `yaml:"postgres"`
+	Jwt         *JwtConfig      `yaml:"jwt"`
+	TLS         *TLS            `yaml:"tls"`
+	FileStorage *FileStorage    `yaml:"filestorage"`
 }
 
 func (c *Config) DatabaseURL() string {

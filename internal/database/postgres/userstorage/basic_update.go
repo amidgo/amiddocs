@@ -71,7 +71,7 @@ func (u *userStorage) UpdateName(ctx context.Context, userId uint64, name userfi
 		name, userId,
 	)
 	if err != nil {
-		return userError(err, amiderrors.NewCause("update name query", "UpdateName", _PROVIDER))
+		return UserError(err, amiderrors.NewCause("update name query", "UpdateName", _PROVIDER))
 	}
 	return nil
 }
@@ -82,7 +82,7 @@ func (u *userStorage) UpdateSurname(ctx context.Context, userId uint64, surname 
 		surname, userId,
 	)
 	if err != nil {
-		return userError(err, amiderrors.NewCause("update surname query", "UpdateSurname", _PROVIDER))
+		return UserError(err, amiderrors.NewCause("update surname query", "UpdateSurname", _PROVIDER))
 	}
 	return nil
 }
@@ -93,7 +93,7 @@ func (u *userStorage) UpdateFatherName(ctx context.Context, userId uint64, fathe
 		fatherName, userId,
 	)
 	if err != nil {
-		return userError(err, amiderrors.NewCause("update father name query", "UpdateFatherName", _PROVIDER))
+		return UserError(err, amiderrors.NewCause("update father name query", "UpdateFatherName", _PROVIDER))
 	}
 	return nil
 }
@@ -104,7 +104,7 @@ func (u *userStorage) UpdateLogin(ctx context.Context, userId uint64, login user
 		login, userId,
 	)
 	if err != nil {
-		return userError(err, amiderrors.NewCause("update login query", "UpdateLogin", _PROVIDER))
+		return UserError(err, amiderrors.NewCause("update login query", "UpdateLogin", _PROVIDER))
 	}
 	return nil
 }
@@ -115,7 +115,7 @@ func (u *userStorage) UpdatePassword(ctx context.Context, userId uint64, hashPas
 		hashPassword, userId,
 	)
 	if err != nil {
-		return userError(err, amiderrors.NewCause("update password query", "UpdatePassword", _PROVIDER))
+		return UserError(err, amiderrors.NewCause("update password query", "UpdatePassword", _PROVIDER))
 	}
 	return nil
 }
@@ -126,7 +126,7 @@ func (u *userStorage) UpdateEmail(ctx context.Context, userId uint64, email user
 		email, userId,
 	)
 	if err != nil {
-		return userError(err, amiderrors.NewCause("update email query", "UpdateEmail", _PROVIDER))
+		return UserError(err, amiderrors.NewCause("update email query", "UpdateEmail", _PROVIDER))
 	}
 	return nil
 }
@@ -137,7 +137,7 @@ func (u *userStorage) RemoveRole(ctx context.Context, userId uint64, role userfi
 		userId, role,
 	)
 	if err != nil {
-		userError(err, amiderrors.NewCause("remove rol query", "RemoveRole", _PROVIDER))
+		UserError(err, amiderrors.NewCause("remove rol query", "RemoveRole", _PROVIDER))
 	}
 	return nil
 }
@@ -148,7 +148,7 @@ func (u *userStorage) AddRole(ctx context.Context, userId uint64, role userfield
 		userId, role,
 	)
 	if err != nil {
-		return userError(err, amiderrors.NewCause("add role query", "AddRole", _PROVIDER))
+		return UserError(err, amiderrors.NewCause("add role query", "AddRole", _PROVIDER))
 	}
 	return nil
 }

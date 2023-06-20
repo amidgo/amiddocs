@@ -28,7 +28,7 @@ import (
 func (s *requestHandler) GenerateDocumentFromRequest(c *fiber.Ctx) error {
 	reqId, err := strconv.ParseUint(c.Query("reqId"), 10, 64)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("get request id from request", "GenerateFromRequest", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("get request id from request", "GenerateFromRequest", _PROVIDER))
 	}
 	err = s.docgen.GenerateDocument(c.UserContext(), c, reqId)
 	if err != nil {

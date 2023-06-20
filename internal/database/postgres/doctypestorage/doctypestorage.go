@@ -20,13 +20,13 @@ func New(p *postgres.Postgres) *docTypeStorage {
 	return &docTypeStorage{p: p}
 }
 
-func docTypeError(err error, cause *amiderrors.Cause) error {
+func DocTypeError(err error, cause *amiderrors.Cause) error {
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return doctypeerror.DOC_TYPE_NOT_FOUND
 	case errors.Is(err, pgx.ErrNoRows):
 		return doctypeerror.DOC_TYPE_NOT_FOUND
 	default:
-		return amiderrors.NewInternalErrorResponse(err, cause)
+		return amiderrors.Wrap(err, cause)
 	}
 }

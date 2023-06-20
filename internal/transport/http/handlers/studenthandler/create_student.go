@@ -31,9 +31,8 @@ func (h *studentHandler) CreateStudent(c *fiber.Ctx) error {
 	createStudentDTO := new(studentmodel.CreateStudentDTO)
 	err := c.BodyParser(createStudentDTO)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse body", "CreateStudent", _PROVIDER))
+		return amiderrors.Wrap(err, amiderrors.NewCause("parse body", "CreateStudent", _PROVIDER))
 	}
-
 	err = validate.ValidateFields(createStudentDTO)
 	if err != nil {
 		return err

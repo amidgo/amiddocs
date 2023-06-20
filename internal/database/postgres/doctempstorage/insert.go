@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/amidgo/amiddocs/internal/models/doctempmodel"
-	"github.com/amidgo/amiddocs/internal/models/doctypemodel"
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
 )
 
@@ -17,7 +16,7 @@ var (
 		(%s, %s,%s)
 			VALUES (
 				$1,
-				(SELECT %s FROM %s WHERE %s = $2),
+				$2,
 				$3
 			)
 		`,
@@ -27,11 +26,6 @@ var (
 		doctempmodel.SQL.DepartmentId,
 		doctempmodel.SQL.DocumentTypeId,
 		doctempmodel.SQL.Data,
-
-		// select doc type id by doc type
-		doctypemodel.SQL.ID,
-		doctypemodel.DocTypeTable,
-		doctypemodel.SQL.Type,
 	)
 )
 
@@ -42,10 +36,10 @@ func (s *doctempStorage) InsertDocTemp(
 	_, err := s.p.Pool.Exec(
 		ctx,
 		doctempInsertQuery,
-		template.DepartmentID, template.DocumentType, template.Document,
+		template.DepartmentID, template.DocumentTypeID, template.Document,
 	)
 	if err != nil {
-		return tempalateError(err, amiderrors.NewCause("insert doc temp into storage", "InsertDocTemp", _PROVIDER))
+		return templateError(err, amiderrors.NewCause("insert doc temp into storage", "InsertDocTemp", _PROVIDER))
 	}
 	return nil
 }

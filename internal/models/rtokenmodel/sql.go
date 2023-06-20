@@ -1,13 +1,12 @@
 package rtokenmodel
 
-// create table if not exists refresh_tokens (
-//     user_id bigserial not null references users(id) on delete cascade,
-//     expired timestamp not null,
-//     token varchar(40) not null unique,
-//     primary key(user_id)
-// );
+// token varchar(40) not null constraint refresh_tokens_unique unique,
 
-const RefreshTokenTable = "refresh_tokens"
+const (
+	RefreshTokenTable               = "refresh_tokens"
+	RefreshTokenUniqueConstraint    = "refresh_tokens_unique"
+	ForeignKey_RefreshTokens__Users = "fk_refresh_tokens__users"
+)
 
 type rtoken_column string
 

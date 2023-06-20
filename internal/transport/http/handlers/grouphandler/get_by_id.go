@@ -25,9 +25,9 @@ const _ID_Q = "id"
 //	@Security		Token
 //	@Router			/groups/get-by-id [get]
 func (h *GroupHandler) GetGroupById(c *fiber.Ctx) error {
-	id, err := strconv.ParseUint(c.Query(_ID_Q, "0"), 10, 64)
+	id, err := strconv.ParseUint(c.Query(_ID_Q), 10, 64)
 	if err != nil {
-		return amiderrors.NewInternalErrorResponse(err, amiderrors.NewCause("parse group id", "GetGroupById", _PROVIDER)).SendWithFiber(c)
+		return amiderrors.Wrap(err, amiderrors.NewCause("parse group id", "GetGroupById", _PROVIDER))
 	}
 	group, err := h.groupP.GroupById(c.UserContext(), id)
 	if err != nil {
