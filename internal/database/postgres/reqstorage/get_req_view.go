@@ -6,6 +6,7 @@ import (
 
 	"github.com/amidgo/amiddocs/internal/models/doctypemodel"
 	"github.com/amidgo/amiddocs/internal/models/reqmodel"
+	"github.com/amidgo/amiddocs/internal/models/reqmodel/reqfields"
 	"github.com/amidgo/amiddocs/internal/models/usermodel"
 	"github.com/amidgo/amiddocs/pkg/amiderrors"
 	"github.com/amidgo/amiddocs/pkg/sqlutils"
@@ -20,6 +21,8 @@ var (
 		INNER JOIN %s ON %s = %s
 		INNER JOIN %s ON %s = %s
 		INNER JOIN %s ON %s = %s
+
+		WHERE %s = $1 AND %s = $2
 
 		GROUP BY %s, %s,%s, %s
 
@@ -53,6 +56,10 @@ var (
 		sqlutils.Full(reqmodel.SQL_STATUS.ID),
 		sqlutils.Full(reqmodel.SQL.StatusId),
 
+		// department id
+		sqlutils.Full(reqmodel.SQL.DepartmentID),
+		sqlutils.Full(reqmodel.SQL_STATUS.Status),
+
 		// group by
 		sqlutils.Full(reqmodel.SQL.ID),
 		sqlutils.Full(usermodel.SQL.ID),
@@ -73,11 +80,12 @@ func scanRequestViewDTO(row pgx.Row, req *reqmodel.RequestViewDTO) error {
 		&req.Status,
 		&req.DocumentType,
 		&req.DocumentCount,
+		&req.UserId,
 	)
 }
 
 func (s *requestStorage) RequestListByDepartmentId(ctx context.Context, depId uint64) ([]*reqmodel.RequestViewDTO, error) {
-	rows, err := s.p.Pool.Query(ctx, getRequestViewList)
+	rows, err := s.p.Pool.Query(ctx, getRequestViewList, depId, reqfields.SEND)
 	if err != nil {
 		return nil, requestError(err, amiderrors.NewCause("get all reqviewdto", "RequestListByDepartmentId", _PROVIDER))
 	}

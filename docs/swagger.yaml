@@ -127,6 +127,8 @@ definitions:
         type: integer
       status:
         $ref: '#/definitions/reqfields.Status'
+      userId:
+        type: integer
     type: object
   reqmodel.fio:
     properties:
@@ -632,7 +634,7 @@ paths:
       tags:
       - requests
   /requests/generate-document:
-    post:
+    get:
       consumes:
       - application/json
       description: returns document from request
@@ -645,12 +647,6 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/reqmodel.RequestViewDTO'
-            type: array
         "400":
           description: Bad Request
           schema:

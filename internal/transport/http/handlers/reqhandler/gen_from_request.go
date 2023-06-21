@@ -16,7 +16,6 @@ import (
 //	@Accept			json
 //	@Produce		json
 //	@Param			reqId	query		uint64	true	"request id"
-//	@Success		200		{array}		reqmodel.RequestViewDTO
 //	@Failure		400		{object}	amiderrors.ErrorResponse
 //	@Failure		401		{object}	amiderrors.ErrorResponse
 //	@Failure		403		{object}	amiderrors.ErrorResponse
@@ -24,7 +23,7 @@ import (
 //	@Failure		500		{object}	amiderrors.ErrorResponse
 //	@Security		Bearer
 //	@Security		Token
-//	@Router			/requests/generate-document [post]
+//	@Router			/requests/generate-document [get]
 func (s *requestHandler) GenerateDocumentFromRequest(c *fiber.Ctx) error {
 	reqId, err := strconv.ParseUint(c.Query("reqId"), 10, 64)
 	if err != nil {

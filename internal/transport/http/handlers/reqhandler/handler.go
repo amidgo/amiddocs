@@ -53,7 +53,7 @@ func SetUp(app *fiber.App, jwt handlers.JwtManager, streqser requestService, jwt
 	route.Delete(_CANCEL, jwt.Ware(), handler.CancelRequest)
 
 	route.Post(_SEND, jwt.Ware(), handler.Send)
-	route.Post(_GENERATE_DOCUMENT, jwt.Ware(), jwt.SecretaryAccess, handler.GenerateDocumentFromRequest)
+	route.Get(_GENERATE_DOCUMENT, jwt.Ware(), jwt.SecretaryAccess, handler.GenerateDocumentFromRequest)
 
 	route.Patch(_SET_DONE, jwt.Ware(), jwt.SecretaryAccess, handler.SetRequestStatusDone)
 

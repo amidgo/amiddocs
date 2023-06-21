@@ -604,7 +604,7 @@ const docTemplate = `{
             }
         },
         "/requests/generate-document": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "Bearer": []
@@ -634,15 +634,6 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/reqmodel.RequestViewDTO"
-                            }
-                        }
-                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
@@ -1557,6 +1548,9 @@ const docTemplate = `{
                 },
                 "status": {
                     "$ref": "#/definitions/reqfields.Status"
+                },
+                "userId": {
+                    "type": "integer"
                 }
             }
         },

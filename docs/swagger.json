@@ -594,7 +594,7 @@
             }
         },
         "/requests/generate-document": {
-            "post": {
+            "get": {
                 "security": [
                     {
                         "Bearer": []
@@ -624,15 +624,6 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/reqmodel.RequestViewDTO"
-                            }
-                        }
-                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
@@ -1547,6 +1538,9 @@
                 },
                 "status": {
                     "$ref": "#/definitions/reqfields.Status"
+                },
+                "userId": {
+                    "type": "integer"
                 }
             }
         },

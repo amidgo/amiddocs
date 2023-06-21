@@ -15,6 +15,7 @@ type fio struct {
 type RequestViewDTO struct {
 	ID            uint64                     `json:"id"`
 	FIO           fio                        `json:"fio"`
+	UserId        uint64                     `json:"userId"`
 	Status        reqfields.Status           `json:"status"`
 	DocumentType  doctypefields.DocumentType `json:"documentType"`
 	DocumentCount reqfields.DocumentCount    `json:"documentCount"`
