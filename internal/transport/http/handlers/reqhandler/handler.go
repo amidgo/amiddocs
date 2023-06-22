@@ -15,7 +15,7 @@ const _PROVIDER = "internal/transport/http/handlers/streqhandler"
 
 type requestProvider interface {
 	RequestListByUser(ctx context.Context, userId uint64) ([]*reqmodel.RequestDTO, error)
-	RequestListByDepartmentId(ctx context.Context, depId uint64) ([]*reqmodel.RequestViewDTO, error)
+	RequestListByDepartmentId(ctx context.Context, depId uint64, status reqfields.Status) ([]*reqmodel.RequestViewDTO, error)
 }
 
 type docGenerator interface {
@@ -36,13 +36,14 @@ type requestHandler struct {
 }
 
 const (
-	_ROUTE_PATH             = "/requests"
-	_SEND                   = "/send"
-	_REQUEST_INFO           = "/my-requests"
-	_GENERATE_DOCUMENT      = "/generate-document"
-	_REQUESTS_BY_DEPARTMENT = "/by-department-id"
-	_SET_DONE               = "/set-done"
-	_CANCEL                 = "/cancel"
+	_ROUTE_PATH                     = "/requests"
+	_SEND                           = "/send"
+	_REQUEST_INFO                   = "/my-requests"
+	_GENERATE_DOCUMENT              = "/generate-document"
+	_REQUESTS_BY_DEPARTMENT         = "/by-department-id"
+	_HISTORY_REQUESTS_BY_DEPARTMENT = "/history-by-department-id"
+	_SET_DONE                       = "/set-done"
+	_CANCEL                         = "/cancel"
 )
 
 func SetUp(app *fiber.App, jwt handlers.JwtManager, streqser requestService, jwtser handlers.JwtManager, reqprov requestProvider, docgen docGenerator) {
@@ -58,5 +59,7 @@ func SetUp(app *fiber.App, jwt handlers.JwtManager, streqser requestService, jwt
 	route.Patch(_SET_DONE, jwt.Ware(), jwt.SecretaryAccess, handler.SetRequestStatusDone)
 
 	route.Get(_REQUESTS_BY_DEPARTMENT, jwt.Ware(), jwt.SecretaryAccess, handler.DepartmentRequests)
+	route.Get(_HISTORY_REQUESTS_BY_DEPARTMENT, jwt.Ware(), jwt.SecretaryAccess, handler.HistoryDepartmentRequest)
+
 	route.Get(_REQUEST_INFO, jwt.Ware(), handler.MyRequests)
 }

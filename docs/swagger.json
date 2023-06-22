@@ -466,7 +466,7 @@
                         "Token": []
                     }
                 ],
-                "description": "get all description by dep id from query requires secretary access",
+                "description": "get all requests with send status by dep id from query requires secretary access",
                 "consumes": [
                     "application/json"
                 ],
@@ -624,6 +624,79 @@
                     }
                 ],
                 "responses": {
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/amiderrors.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/requests/history-by-department-id": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    },
+                    {
+                        "Token": []
+                    }
+                ],
+                "description": "get all requests with done status by dep id from query requires secretary access",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "requests"
+                ],
+                "summary": "HistoryDepartentRequests",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "department id",
+                        "name": "depId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/reqmodel.RequestViewDTO"
+                            }
+                        }
+                    },
                     "400": {
                         "description": "Bad Request",
                         "schema": {

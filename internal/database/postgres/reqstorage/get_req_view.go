@@ -16,7 +16,7 @@ import (
 var (
 	getRequestViewList = fmt.Sprintf(
 		`
-		SELECT %s, %s, %s, %s, %s, %s, %s, %s
+		SELECT %s, %s, %s, %s, %s, %s, %s
 			FROM %s
 		INNER JOIN %s ON %s = %s
 		INNER JOIN %s ON %s = %s
@@ -36,7 +36,6 @@ var (
 		sqlutils.Full(reqmodel.SQL_STATUS.Status),
 		sqlutils.Full(doctypemodel.SQL.Type),
 		sqlutils.Full(reqmodel.SQL.Count),
-		sqlutils.Full(usermodel.SQL.ID),
 
 		// from request table
 		reqmodel.RequestTable,
@@ -80,12 +79,11 @@ func scanRequestViewDTO(row pgx.Row, req *reqmodel.RequestViewDTO) error {
 		&req.Status,
 		&req.DocumentType,
 		&req.DocumentCount,
-		&req.UserId,
 	)
 }
 
-func (s *requestStorage) RequestListByDepartmentId(ctx context.Context, depId uint64) ([]*reqmodel.RequestViewDTO, error) {
-	rows, err := s.p.Pool.Query(ctx, getRequestViewList, depId, reqfields.SEND)
+func (s *requestStorage) RequestListByDepartmentId(ctx context.Context, depId uint64, status reqfields.Status) ([]*reqmodel.RequestViewDTO, error) {
+	rows, err := s.p.Pool.Query(ctx, getRequestViewList, depId, status)
 	if err != nil {
 		return nil, requestError(err, amiderrors.NewCause("get all reqviewdto", "RequestListByDepartmentId", _PROVIDER))
 	}

@@ -176,7 +176,6 @@ func (s *requestStorage) LastRequestByUserId(
 ) (*reqmodel.RequestDTO, error) {
 	req := new(reqmodel.RequestDTO)
 	req.DocumentType = new(doctypemodel.DocumentTypeDTO)
-	fmt.Println(lastrequestQuery)
 	row := s.p.Pool.QueryRow(ctx, lastrequestQuery, docType, userId)
 	err := scanRequest(row, req)
 	if err != nil {
